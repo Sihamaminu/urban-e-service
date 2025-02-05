@@ -34,40 +34,48 @@ const data = {
   },
   navMain: [
     {
-      title: "Playground",
+      title: "Land Dev't and Mgmt",
       url: "#",
       icon: SquareTerminal,
       isActive: true,
       items: [
-        {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
+        // {
+        //   title: "History",
+        //   url: "#",
+        // },
+        // {
+        //   title: "Starred",
+        //   url: "#",
+        // },
+        // {
+        //   title: "Settings",
+        //   url: "#",
+        // },
       ],
     },
     {
-      title: "Models",
+      title: "Building Permit Sector",
       url: "#",
       icon: Bot,
       items: [
         {
-          title: "Genesis",
+          title: "Construction Permit",
+          url: "construction_permit",
+        },
+        {
+          title: "Demolition Permit",
+          url: "demolition_permit",
+        },
+        {
+          title: "Night Construction Permit",
           url: "#",
         },
         {
-          title: "Explorer",
+          title: "Advertising Permit",
           url: "#",
         },
         {
-          title: "Quantum",
+          title: "Replacement Certificate Service",
           url: "#",
         },
       ],

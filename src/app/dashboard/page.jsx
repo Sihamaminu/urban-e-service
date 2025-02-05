@@ -14,6 +14,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import StepperForm from "@/components/StepperForm";
+import { Outlet } from "react-router-dom";
 
 export default function Page() {
   return (
@@ -48,8 +49,8 @@ export default function Page() {
           {/* </div> */}
         {/* </div> */}
 
-        <StepperForm />
-
+        {/* <StepperForm /> */}
+        <Outlet/>
       </SidebarInset>
     </SidebarProvider>
   );

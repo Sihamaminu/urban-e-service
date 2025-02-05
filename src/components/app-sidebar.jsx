@@ -59,8 +59,8 @@ const data = {
       icon: Bot,
       items: [
         {
-          title: "Construction Permit",
-          url: "construction_permit",
+          title: "Building Permit",
+          url: "building_permit",
         },
         {
           title: "Demolition Permit",
@@ -80,6 +80,13 @@ const data = {
         },
       ],
     },
+
+    // {
+    //   title: "My Requsets",
+    //   url: "my_requests",
+    //   icon: Bot,
+     
+    // },
     // {
     //   title: "Documentation",
     //   url: "#",
@@ -129,15 +136,20 @@ const data = {
   ],
   navSecondary: [
     {
-      title: "Support",
-      url: "#",
+      title: "My Requests",
+      url: "my_requests",
       icon: LifeBuoy,
     },
-    {
-      title: "Feedback",
-      url: "#",
-      icon: Send,
-    },
+    // {
+    //   title: "Support",
+    //   url: "#",
+    //   icon: LifeBuoy,
+    // },
+    // {
+    //   title: "Feedback",
+    //   url: "#",
+    //   icon: Send,
+    // },
   ],
   projects: [
     // {

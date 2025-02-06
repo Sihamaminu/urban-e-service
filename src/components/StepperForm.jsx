@@ -18,6 +18,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox"
 
+import { useToast } from "@/hooks/use-toast"
+
+import { useForm, Controller } from 'react-hook-form';
 
 
 function StepperForm() {
@@ -26,42 +29,250 @@ function StepperForm() {
   const nextStep = () => currentStep < 4 && setCurrentStep(currentStep + 1);
   const prevStep = () => currentStep > 1 && setCurrentStep(currentStep - 1);
 
+  const { control, handleSubmit, setValue, watch, reset } = useForm();
+
+  const { toast } = useToast();
+  const [plotNumber, setPlotNumber] = useState('');
+  // const [formData, setFormData] = useState({
+  //   city: '',
+  //   subCity: '',
+  //   wereda: '',
+  //   streetNumber: '',
+  //   houseNumber: ''
+  // });
+  const [isDisabled, setIsDisabled] = useState(false);
+
+  // Dummy data for mocking API response
+  const dummyData = {
+    '1234': {
+      city: 'Addis Ababa',
+      subCity: 'Bole',
+      wereda: 'Wereda 5',
+      streetNumber: 'Street 12',
+      houseNumber: '45A'
+    },
+    '5678': {
+      city: 'Adama',
+      subCity: 'Asella',
+      wereda: 'Wereda 8',
+      streetNumber: 'Street 7',
+      houseNumber: '67B'
+    }
+  };
+
+  const onSubmit = (data) => {
+    // You can handle form submission logic here
+    toast({ description: 'Form Submitted!' });
+    console.log(data);
+  };
+
+  const handleSearch = (plotNumber) => {
+    debugger;
+    if (dummyData[plotNumber]) {
+      setValue('city', dummyData[plotNumber].city);
+      setValue('subCity', dummyData[plotNumber].subCity);
+      setValue('wereda', dummyData[plotNumber].wereda);
+      setValue('streetNumber', dummyData[plotNumber].streetNumber);
+      setValue('houseNumber', dummyData[plotNumber].houseNumber);
+      setIsDisabled(true);
+      toast({ description: 'Data retrieved successfully!' });
+    } else {
+      reset();
+      setIsDisabled(false);
+      toast({ description: 'No data found for this plot number.' });
+    }
+  };
+
+  // const handleSearch = () => {
+  //   debugger;
+  //   if (dummyData[plotNumber]) {
+  //     setFormData(dummyData[plotNumber]);
+  //     setIsDisabled(true);
+  //     toast({ description: 'Data retrieved successfully!' });
+  //   } else {
+  //     toast({ description: 'No data found for this plot number.' });
+  //     setFormData({
+  //       city: '',
+  //       subCity: '',
+  //       wereda: '',
+  //       streetNumber: '',
+  //       houseNumber: ''
+  //     });
+  //     setIsDisabled(false);
+  //   }
+  // };
+
   const StepContent = () => {
     switch (currentStep) {
       case 1:
-        return (
-          <div className="space-y-4">
-            <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
+
+      return (
+        <div className="space-y-4">
+          <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
             Step 1: The address where the construction will take place
-    </h3>
+          </h3>
+
+          <Controller
+          name="plotNumber"
+          control={control}
+          defaultValue=""
+          render={({ field }) => (
             <Input
-                           type="text"
-                           placeholder="Plot Number"
-                         />
-                           <Input
-                           type="text"
-                           placeholder="City"
-                         />
-                         <Input
-                           type="text"
-                           placeholder="Sub City"
-                         />
-                         <Input
-                           type="text"
-                           placeholder="Wereda/ Kebele"
-                         />
-                         <Input
-                           type="text"
-                           placeholder="Street Number"
-                         />
-                         <Input
-                           type="text"
-                           placeholder="House Number"
-                         />
+              {...field}
+              type="text"
+              placeholder="Plot Number"
+              onChange={(e) => {
+                setValue('plotNumber', e.target.value); 
+                // Handle onChange only for plotNumber input, 
+                // rest of the form will be handled by react-hook-form
+                field.onChange(e);
+
+              }}
+              value = {field.value}
+            />
+          )}
+        />
+          {/* <Input
+            type="text"
+            placeholder="Plot Number"
+            value={plotNumber}
+            onChange={(e) =>{
+              e.preven
+              setPlotNumber(e.target.value)
+            }}
+          /> */}
+          <Button
+            variant="outline"
+            onClick={() => handleSearch(watch('plotNumber'))}
+          >
+            Search
+          </Button>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <Controller
+              control={control}
+              name="city"
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  type="text"
+                  placeholder="City"
+                  disabled={isDisabled}
+                />
+              )}
+            />
+            <Controller
+              control={control}
+              name="subCity"
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  type="text"
+                  placeholder="Sub City"
+                  disabled={isDisabled}
+                />
+              )}
+            />
+            <Controller
+              control={control}
+              name="wereda"
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  type="text"
+                  placeholder="Wereda/Kebele"
+                  disabled={isDisabled}
+                />
+              )}
+            />
+            <Controller
+              control={control}
+              name="streetNumber"
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  type="text"
+                  placeholder="Street Number"
+                  disabled={isDisabled}
+                />
+              )}
+            />
+            <Controller
+              control={control}
+              name="houseNumber"
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  type="text"
+                  placeholder="House Number"
+                  disabled={isDisabled}
+                />
+              )}
+            />
+          </form>
+        </div>
+      );
+    //     return (
+    //       <div className="space-y-4">
+    //         <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
+    //         Step 1: The address where the construction will take place
+    // </h3>
+    //                       <Input
+    //                        type="text"
+    //                        placeholder="Plot Number"
+    //                        value={plotNumber}
+    //                        onChange={(e) => 
+    //                         setPlotNumber(e.target.value)
+    //                       }
+    //                      />
+    //                      {/* <Button onClick={handleSearch} className="mt-2">
+    //     Search
+    //   </Button> */}
+    //   <Button
+    //   variant="outline"
+    //   onClick={handleSearch}
+    // >
+    //   Show Toast
+    // </Button>
+    //                        <Input
+    //                        type="text"
+    //                        placeholder="City"
+    //                        value={formData.city}
+    //                        disabled
+    //                        onChange={(e) => setFormData({ ...formData, city: e.target.value})}
+    //                      />
+    //                      <Input
+    //                        type="text"
+    //                        placeholder="Sub City"
+    //                        value={formData.subCity}
+    //                       disabled //={isDisabled}
+    //                       onChange={(e) => setFormData({ ...formData, subCity: e.target.value })}
+    //                      />
+    //                      <Input
+    //                        type="text"
+    //                        placeholder="Wereda/ Kebele"
+    //                        value={formData.wereda}
+    //                       disabled //={isDisabled}
+    //                       onChange={(e) => setFormData({ ...formData, wereda: e.target.value })}
+    //                      />
+    //                      <Input
+    //                        type="text"
+    //                        placeholder="Street Number"
+    //                        value={formData.streetNumber}
+    //                       disabled //={isDisabled}
+    //                       onChange={(e) => setFormData({ ...formData, streetNumber: e.target.value })}
+    //                      />
+    //                      <Input
+    //                        type="text"
+    //                        placeholder="House Number"
+    //                        value={formData.houseNumber}
+    //                       disabled //={isDisabled}
+    //                       onChange={(e) => setFormData({ ...formData, houseNumber: e.target.value })}
+    //                      />
             
             
-          </div>
-        );
+    //       </div>
+    //     );
       case 2:
         return (
           <div className="space-y-4">

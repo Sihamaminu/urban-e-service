@@ -54,6 +54,7 @@ export default function RegisterForm({ className, ...props }) {
   })
 
   const onSubmit = async (data) => {
+    debugger;
     try {
       const formData = new FormData()
 

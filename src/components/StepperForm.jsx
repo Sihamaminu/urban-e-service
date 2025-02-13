@@ -21,7 +21,16 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { useToast } from "@/hooks/use-toast"
 
 import { useForm, Controller } from 'react-hook-form';
+import axios from 'axios';
 
+// import * as yup from 'yup';
+
+
+// const schema = yup.object().shape({
+//   name: yup.string().required('Name is required'),
+//   email: yup.string().email('Invalid email').required('Email is required'),
+//   age: yup.number().required('Age is required').min(18, 'You must be at least 18 years old'),
+// });
 
 function StepperForm() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -30,6 +39,10 @@ function StepperForm() {
   const prevStep = () => currentStep > 1 && setCurrentStep(currentStep - 1);
 
   const { control, handleSubmit, setValue, watch, reset } = useForm();
+
+  // const { register, handleSubmit, formState: { errors } } = useForm({
+  //   resolver: yupResolver(schema)
+  // });
 
   const { toast } = useToast();
   const [plotNumber, setPlotNumber] = useState('');
@@ -60,47 +73,136 @@ function StepperForm() {
     }
   };
 
-  const onSubmit = (data) => {
+  // const onSubmit = async (data) => {
+  //   try {
+  //     const response = await axios.post(apiUrl, data, {
+  //       headers: {
+  //         'Content-Type': 'application/json'
+  //       }
+  //     });
+  //     console.log('Response:', response.data);
+  //   } catch (error) {
+  //     console.error('Error submitting form:', error);
+  //   }
+  // };
+  const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null; // Cookie not found
+  };
+
+
+  const onSubmit = async (data) => {
+    try {
+      debugger;
+
+    const formData = watch(); // Watch collects all data from all steps
     // You can handle form submission logic here
     toast({ description: 'Form Submitted!' });
     console.log(data);
-  };
 
-  const handleSearch = (plotNumber) => {
-    debugger;
-    if (dummyData[plotNumber]) {
-      setValue('city', dummyData[plotNumber].city);
-      setValue('subCity', dummyData[plotNumber].subCity);
-      setValue('wereda', dummyData[plotNumber].wereda);
-      setValue('streetNumber', dummyData[plotNumber].streetNumber);
-      setValue('houseNumber', dummyData[plotNumber].houseNumber);
-      setIsDisabled(true);
-      toast({ description: 'Data retrieved successfully!' });
+    const token = getCookie('accessToken');
+    // const token = localStorage.getItem('accessToken');
+    const userPayload = JSON.parse(localStorage.getItem('userPayload'));
+    const theuserid = userPayload.id;
+
+    const payload = {
+      serviceId:   "67a8b6367790b30993406c31", //formData.serviceId,  // Replace with your actual form field name
+      subServiceId:  "67a8b7097790b30993406c36", //formData.subServiceId,  // Replace with your actual form field name
+      applicationDetails: "formData"  // Replace with your actual form field name
+    };
+
+    var apiUrl = `http://localhost:4023/api/application/apply`; //?userId=${theuserid}`
+    const response = await axios.post(apiUrl, payload, {
+      // method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`, // If your API requires token authentication
+        'x-access-token': token
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.data; //json();
+
+
+    if (response.status == 201) {
+      toast({ description: 'Service application submitted successfully!' });
+      console.log('Success:', result);
     } else {
-      reset();
-      setIsDisabled(false);
-      toast({ description: 'No data found for this plot number.' });
+      toast({ description: `Error: ${result.message}` });
+      console.error('Error:', result);
     }
+    
+    // Reset the form after submission
+    reset();
+    setCurrentStep(1);
+    setIsDisabled(false);
+    } catch (error) {
+      console.error('Submission Error:', error);
+    toast({ description: 'An error occurred while submitting the form.' });
+    }
+
   };
 
-  // const handleSearch = () => {
+  // const handleSearch = (plotNumber) => {
   //   debugger;
   //   if (dummyData[plotNumber]) {
-  //     setFormData(dummyData[plotNumber]);
+  //     setValue('city', dummyData[plotNumber].city);
+  //     setValue('subCity', dummyData[plotNumber].subCity);
+  //     setValue('wereda', dummyData[plotNumber].wereda);
+  //     setValue('streetNumber', dummyData[plotNumber].streetNumber);
+  //     setValue('houseNumber', dummyData[plotNumber].houseNumber);
   //     setIsDisabled(true);
   //     toast({ description: 'Data retrieved successfully!' });
   //   } else {
-  //     toast({ description: 'No data found for this plot number.' });
-  //     setFormData({
-  //       city: '',
-  //       subCity: '',
-  //       wereda: '',
-  //       streetNumber: '',
-  //       houseNumber: ''
-  //     });
+  //     reset();
   //     setIsDisabled(false);
+  //     toast({ description: 'No data found for this plot number.' });
   //   }
   // };
+
+  const handleSearch = async (plotNumber) => {
+    try {
+      plotNumber = plotNumber.toUpperCase()
+debugger;
+      const token = localStorage.getItem('accessToken');
+  const refreshToken = localStorage.getItem('refreshToken');
+  const userPayload = JSON.parse(localStorage.getItem('userPayload'));
+  const theuserid = userPayload.id;
+
+      const response = await axios.get(`http://localhost:4023/api/plot?plotNumber=${plotNumber}`);
+      const data = response.data;
+
+      if (data.status === 'success' && data.plots.length > 0) {
+        const plot = data.plots.find(p => p.plotNumber === plotNumber);
+        
+        if (plot) {
+          setValue('city', plot.address.region);
+          setValue('subCity', plot.address.subCity);
+          setValue('wereda', plot.address.woreda);
+          setValue('streetNumber', plot.address.kebele);
+          setValue('houseNumber', plot.address.houseNumber);
+          setIsDisabled(true);
+          toast({ description: 'Data retrieved successfully!' });
+        } else {
+          reset();
+          setIsDisabled(false);
+          toast({ description: 'No data found for this plot number.' });
+        }
+      } else {
+        reset();
+        setIsDisabled(false);
+        toast({ description: 'No data found.' });
+      }
+    } catch (error) {
+      console.error('Error fetching plot data:', error);
+      toast({ description: 'Failed to fetch data from the server.' });
+    }
+  };
+
+
 
   const StepContent = () => {
     switch (currentStep) {
@@ -212,67 +314,7 @@ function StepperForm() {
           </form>
         </div>
       );
-    //     return (
-    //       <div className="space-y-4">
-    //         <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
-    //         Step 1: The address where the construction will take place
-    // </h3>
-    //                       <Input
-    //                        type="text"
-    //                        placeholder="Plot Number"
-    //                        value={plotNumber}
-    //                        onChange={(e) => 
-    //                         setPlotNumber(e.target.value)
-    //                       }
-    //                      />
-    //                      {/* <Button onClick={handleSearch} className="mt-2">
-    //     Search
-    //   </Button> */}
-    //   <Button
-    //   variant="outline"
-    //   onClick={handleSearch}
-    // >
-    //   Show Toast
-    // </Button>
-    //                        <Input
-    //                        type="text"
-    //                        placeholder="City"
-    //                        value={formData.city}
-    //                        disabled
-    //                        onChange={(e) => setFormData({ ...formData, city: e.target.value})}
-    //                      />
-    //                      <Input
-    //                        type="text"
-    //                        placeholder="Sub City"
-    //                        value={formData.subCity}
-    //                       disabled //={isDisabled}
-    //                       onChange={(e) => setFormData({ ...formData, subCity: e.target.value })}
-    //                      />
-    //                      <Input
-    //                        type="text"
-    //                        placeholder="Wereda/ Kebele"
-    //                        value={formData.wereda}
-    //                       disabled //={isDisabled}
-    //                       onChange={(e) => setFormData({ ...formData, wereda: e.target.value })}
-    //                      />
-    //                      <Input
-    //                        type="text"
-    //                        placeholder="Street Number"
-    //                        value={formData.streetNumber}
-    //                       disabled //={isDisabled}
-    //                       onChange={(e) => setFormData({ ...formData, streetNumber: e.target.value })}
-    //                      />
-    //                      <Input
-    //                        type="text"
-    //                        placeholder="House Number"
-    //                        value={formData.houseNumber}
-    //                       disabled //={isDisabled}
-    //                       onChange={(e) => setFormData({ ...formData, houseNumber: e.target.value })}
-    //                      />
-            
-            
-    //       </div>
-    //     );
+   
       case 2:
         return (
           <div className="space-y-4">
@@ -280,34 +322,35 @@ function StepperForm() {
             Step 2: Construction services for which the Plan Agreement is requested
     </h3>
 
-<Select>
-      <SelectTrigger className="w-full">
-        <SelectValue placeholder="Select a service" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectGroup>
-          <SelectLabel>Select Building Service</SelectLabel>
-          <SelectItem value="house">House</SelectItem>
-          <SelectItem value="shop">Shop</SelectItem>
-          <SelectItem value="office">Office</SelectItem>
-          <SelectItem value="hotel">Hotel</SelectItem>
-          <SelectItem value="manufacturing">Manufacturing</SelectItem>
-          <SelectItem value="apartment">Apartment</SelectItem>
-          <SelectItem value="warehouse">Warehouse</SelectItem>
-          <SelectItem value="healthcare">Health Care</SelectItem>
-          <SelectItem value="hotel">School</SelectItem>
-          <SelectItem value="infrastructure">Infrastructure</SelectItem>
-          <SelectItem value="others">Others</SelectItem>
-        </SelectGroup>
-      </SelectContent>
-    </Select>
+    <Controller
+              name="buildingService"
+              control={control}
+              render={({ field }) => (
+                <Select {...field}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a service" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Select Building Service</SelectLabel>
+                      <SelectItem value="house">House</SelectItem>
+                      <SelectItem value="shop">Shop</SelectItem>
+                      <SelectItem value="office">Office</SelectItem>
+                      <SelectItem value="hotel">Hotel</SelectItem>
+                      <SelectItem value="manufacturing">Manufacturing</SelectItem>
+                      <SelectItem value="apartment">Apartment</SelectItem>
+                      <SelectItem value="warehouse">Warehouse</SelectItem>
+                      <SelectItem value="healthcare">Health Care</SelectItem>
+                      <SelectItem value="school">School</SelectItem>
+                      <SelectItem value="infrastructure">Infrastructure</SelectItem>
+                      <SelectItem value="others">Others</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              )}
+            />
 
-    
-
-            {/* <Input placeholder="Building Height (m)" />
-            <Input placeholder="Underground (m)" />
-            <Input placeholder="Floors Above Ground" />
-            <Input placeholder="Underground" /> */}
+          
           </div>
         );
       case 3:
@@ -316,21 +359,26 @@ function StepperForm() {
             <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
             Step 3: The type of construction for which Plan's consent is requested
     </h3>
-    <Select>
-      <SelectTrigger className="w-full">
-        <SelectValue placeholder="Select a Building Type" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectGroup>
-          <SelectLabel></SelectLabel>
-          <SelectItem value="house">New</SelectItem>
-          <SelectItem value="shop">Improvement /Expansion</SelectItem>
-          <SelectItem value="shop">Building Permit Extension</SelectItem>
-        </SelectGroup>
-      </SelectContent>
-    </Select>
+    <Controller
+              name="buildingType"
+              control={control}
+              render={({ field }) => (
+                <Select {...field}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a Building Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="new">New</SelectItem>
+                      <SelectItem value="improvement">Improvement /Expansion</SelectItem>
+                      <SelectItem value="extension">Building Permit Extension</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              )}
+            />
 
-    <Input type="text" placeholder="Previous building permit number, if existing"/>
+    <Input type="text" placeholder="Previous building permit number, if existing" {...control.register('previousPermit')} />
 
 
     {/* Date of issue of the permit
@@ -338,14 +386,14 @@ function StepperForm() {
 
     <div className="grid w-full max-w-sm items-center gap-1.5">
                 <Label htmlFor="date">Date of issue of building permit</Label>
-                <Input type="date" id="date" placeholder="Date of issue of building permit" />
+                <Input type="date" id="date" placeholder="Date of issue of building permit" {...control.register('permitDate')} />
                 </div>
 
-                <Input type="text" placeholder="Construction cost"/>
-                <Input type="text" placeholder="Number of floors"/>
-                <Input type="text" placeholder="Height above ground in meters"/>
-                <Input type="text" placeholder="Number of floors below ground"/>
-                <Input type="text" placeholder="Depth below ground in meters"/>
+                <Input type="text" placeholder="Construction cost" {...control.register('constructionCost')} />
+                <Input type="text" placeholder="Number of floors" {...control.register('floors')} />
+                <Input type="text" placeholder="Height above ground in meters" {...control.register('heightAboveGround')} />
+                <Input type="text" placeholder="Number of floors below ground" {...control.register('numberOfFloorsBelowGround')} />
+                <Input type="text" placeholder="Depth below ground in meters" {...control.register('depthBelowGroundInMeters')} />
 
                 <div className="grid w-full gap-1.5">
       <Label htmlFor="message">Detailed description of construction content on the boundary</Label>
@@ -361,10 +409,10 @@ function StepperForm() {
             <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
             Step 4: The Consulting Firm
     </h3>
-    <Input type="text" placeholder="Name"/>
-                <Input type="text" placeholder="Level"/>
-                <Input type="text" placeholder="Address"/>
-                <Input type="tel" placeholder="Phone Number"/>
+    <Input type="text" placeholder="Name" {...control.register('consultingFirmName')} />
+                <Input type="text" placeholder="Level" {...control.register('firmLevel')} />
+                <Input type="text" placeholder="Address" {...control.register('firmAddress')} />
+                <Input type="tel" placeholder="Phone Number" {...control.register('firmPhone')} />
             
                 
 
@@ -376,7 +424,7 @@ function StepperForm() {
 
 
     <div className="items-top flex space-x-2">
-      <Checkbox id="terms1" />
+      <Checkbox id="terms1" {...control.register('terms')} />
       <div className="grid gap-1.5 leading-none">
         <label
           htmlFor="terms1"
@@ -391,13 +439,13 @@ function StepperForm() {
     </div>
 
 
-    <Input type="text" placeholder="Name of the applicant for the building permit"/>
-    <Input type="text" placeholder="Phone Number"/>
-    <Input type="text" placeholder="TIN Number"/>
-    <Input type="text" placeholder="Sign"/>
+    <Input type="text" placeholder="Name of the applicant for the building permit" {...control.register('nameOfApplicant')} />
+    <Input type="text" placeholder="Phone Number" {...control.register('phoneNumber')}/>
+    <Input type="text" placeholder="TIN Number" {...control.register('tinNumber')}/>
+    <Input type="text" placeholder="Sign" {...control.register('sign')}/>
     <div className="grid w-full max-w-sm items-center gap-1.5">
                 <Label htmlFor="date">Date</Label>
-                <Input type="date" id="date" placeholder="Date of issue of building permit" />
+                <Input type="date" id="date" placeholder="Date of issue of building permit" {...control.register('dateOfIssueOfPermit')} />
                 </div>
             
           </div>
@@ -452,6 +500,7 @@ function StepperForm() {
             ))}
           </div>
 
+          <form onSubmit={(e) => e.preventDefault()}>
           <StepContent />
 
           <div className="mt-8 flex justify-between">
@@ -463,13 +512,20 @@ function StepperForm() {
             >
               Previous
             </Button>
-            <Button
+            {/* <Button
               onClick={nextStep}
-              disabled={currentStep === 4}
+              // disabled={currentStep === 4}
             >
               {currentStep === 4 ? 'Submit' : 'Next'}
-            </Button>
+            </Button> */}
+            <Button
+                type={currentStep === 4 ? 'submit' : 'button'}
+                onClick={currentStep !== 4 ? nextStep : onSubmit}
+              >
+                {currentStep === 4 ? 'Submit' : 'Next'}
+              </Button>
           </div>
+          </form>
         </CardContent>
       </Card>
     </div>

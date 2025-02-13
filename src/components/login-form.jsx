@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label"
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import axios from "axios"
+import {jwtDecode} from 'jwt-decode';
 
 export function LoginForm({ className, ...props }) {
   const navigate = useNavigate()
@@ -19,6 +20,13 @@ export function LoginForm({ className, ...props }) {
   const [phoneNumber, setPhoneNumber] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
+
+
+  const setCookie = (name, value, days = 7) => {
+    const expires = new Date();
+    expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+    document.cookie = `${name}=${value}; expires=${expires.toUTCString()}; path=/`;
+  };
 
   const handleSubmit = async (e) => {
     debugger;
@@ -36,9 +44,20 @@ export function LoginForm({ className, ...props }) {
       // Assuming the API returns a token or user data on successful login
       const { token, user } = response.data
 
+
+      if (response.data.token) {
+        setCookie('accessToken', response.data.token, 7); // Cookie expires in 7 days
+      } else {
+        toast({ description: 'Login failed. Please try again.' });
+      }
+
+
       // Store the token in localStorage (or another secure place)
-      localStorage.setItem("authToken", token)
+      localStorage.setItem("authToken", response.data.token)
       localStorage.setItem("user", JSON.stringify(user))
+      const decodedPayload = jwtDecode(token);
+  localStorage.setItem('userPayload', JSON.stringify(decodedPayload));
+  console.log('Token and payload stored successfully:', decodedPayload);
 
       // Redirect to dashboard on success
       navigate("/dashboard")
@@ -64,7 +83,7 @@ export function LoginForm({ className, ...props }) {
           <CardContent>
             <form onSubmit={handleSubmit}>
               <div className="flex flex-col gap-6">
-                <div className="grid gap-2">
+                {/* <div className="grid gap-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
@@ -74,7 +93,7 @@ export function LoginForm({ className, ...props }) {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                   />
-                </div>
+                </div> */}
                                <div className="grid gap-2">
                 <Label htmlFor="phoneNumber">Phone Number</Label>
                 <Input type="tel" id="phoneNumber" value={phoneNumber}

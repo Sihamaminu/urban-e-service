@@ -29,11 +29,33 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { Button } from "@/components/ui/button"
+import {jwtDecode} from 'jwt-decode';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from "react-router-dom"
 
 export function NavUser({
   user
 }) {
   const { isMobile } = useSidebar()
+
+
+  const navigate = useNavigate()
+  const [firstName, setFirstName] = useState('');
+
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      const decoded = jwtDecode(token);
+      setFirstName(decoded.firstName); // Assuming your token has 'firstName'
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('accessToken'); // Clear the token
+    // window.location.href = "/"; // Redirect to login
+    navigate("/")
+  };
 
   return (
     (<SidebarMenu>
@@ -44,11 +66,13 @@ export function NavUser({
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatar} alt={user.name} />
+                {/* <AvatarImage src={user.avatar} alt={user.name} /> */}
+                <AvatarImage src={user.avatar} alt={firstName} />
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{user.name}</span>
+                {/* <span className="truncate font-semibold">{user.name}</span> */}
+                <span className="truncate font-semibold">{firstName}</span>
                 <span className="truncate text-xs">{user.email}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
@@ -71,7 +95,7 @@ export function NavUser({
                 </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
+            {/* <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <Sparkles />
@@ -93,10 +117,11 @@ export function NavUser({
                 Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator /> */}
             <DropdownMenuItem>
-              <LogOut />
-              Log out
+              {/* <LogOut onClick={handleLogout} /> */}
+              {/* Log out */}
+              <Button onClick={handleLogout}>Log Out</Button>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

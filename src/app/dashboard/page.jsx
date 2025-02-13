@@ -16,8 +16,21 @@ import {
 import StepperForm from "@/components/StepperForm";
 import { Outlet } from "react-router-dom";
 
+import { jwtDecode } from 'jwt-decode';
+
+const token = localStorage.getItem('accessToken');
+
+if (token) {
+  debugger;
+  const decoded = jwtDecode(token);
+  console.log(decoded); // Display the token payload (e.g., { id, role, email, firstName })
+}
+
 export default function Page() {
   return (
+
+
+
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>

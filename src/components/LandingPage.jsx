@@ -1,5 +1,14 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { Card, CardContent } from "@/components/ui/card"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
+
 
 const LandingPage = () => {
   const text = "How does this Website Work?".split(" ");
@@ -30,13 +39,98 @@ const LandingPage = () => {
   return (
     <div>
       {/* Top Section */}
-      <div className="flex justify-center bg-blue-500">
-        <img
-          src="https://placehold.co/600x400"
-          alt="Airplane"
-          className="w-full max-w-4xl"
-        />
-      </div>
+      <div>
+  {/* Top Section */}
+  <div className="flex justify-center bg-gray-200 h-[75vh]">
+    <Carousel
+      opts={{
+        align: "start",
+      }}
+      className="w-full max-w-4xl h-full flex items-center"  
+    >
+      <CarouselContent className="flex items-center">
+        {/* First Card */}
+        <CarouselItem className="md:basis-1/2 lg:basis-1/3">
+          <div className="p-4">
+            <Card className="w-full h-80"> {/* Increased card height */}
+              <CardContent className="flex items-center justify-center p-2 h-full">
+                <img 
+                  src="https://via.placeholder.com/400x300?text=Image+1"
+                  alt="Placeholder 1"
+                  className="object-cover w-full h-full rounded-lg"
+                />
+              </CardContent>
+            </Card>
+          </div>
+        </CarouselItem>
+
+        {/* Second Card */}
+        <CarouselItem className="md:basis-1/2 lg:basis-1/3">
+          <div className="p-4">
+            <Card className="w-full h-80">
+              <CardContent className="flex items-center justify-center p-2 h-full">
+                <img 
+                  src="https://via.placeholder.com/400x300?text=Image+2"
+                  alt="Placeholder 2"
+                  className="object-cover w-full h-full rounded-lg"
+                />
+              </CardContent>
+            </Card>
+          </div>
+        </CarouselItem>
+
+        {/* Third Card */}
+        <CarouselItem className="md:basis-1/2 lg:basis-1/3">
+          <div className="p-4">
+            <Card className="w-full h-80">
+              <CardContent className="flex items-center justify-center p-2 h-full">
+                <img 
+                  src="https://via.placeholder.com/400x300?text=Image+3"
+                  alt="Placeholder 3"
+                  className="object-cover w-full h-full rounded-lg"
+                />
+              </CardContent>
+            </Card>
+          </div>
+        </CarouselItem>
+
+        {/* Fourth Card */}
+        <CarouselItem className="md:basis-1/2 lg:basis-1/3">
+          <div className="p-4">
+            <Card className="w-full h-80">
+              <CardContent className="flex items-center justify-center p-2 h-full">
+                <img 
+                  src="https://via.placeholder.com/400x300?text=Image+4"
+                  alt="Placeholder 4"
+                  className="object-cover w-full h-full rounded-lg"
+                />
+              </CardContent>
+            </Card>
+          </div>
+        </CarouselItem>
+
+        {/* Fifth Card */}
+        <CarouselItem className="md:basis-1/2 lg:basis-1/3">
+          <div className="p-4">
+            <Card className="w-full h-80">
+              <CardContent className="flex items-center justify-center p-2 h-full">
+                <img 
+                  src="https://via.placeholder.com/400x300?text=Image+5"
+                  alt="Placeholder 5"
+                  className="object-cover w-full h-full rounded-lg"
+                />
+              </CardContent>
+            </Card>
+          </div>
+        </CarouselItem>
+      </CarouselContent>
+      
+      <CarouselPrevious className="self-center" />
+      <CarouselNext className="self-center" />
+    </Carousel>
+  </div>
+</div>
+
 
       {/* Text Animation */}
       <div className="my-32 flex justify-center">

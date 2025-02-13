@@ -60,11 +60,11 @@ const data = {
       items: [
         {
           title: "Building Permit",
-          url: "building_permit",
+          url: "/dashboard/building_permit",
         },
         {
           title: "Demolition Permit",
-          url: "demolition_permit",
+          url: "/dashboard/demolition_permit",
         },
         {
           title: "Night Construction Permit",
@@ -137,7 +137,7 @@ const data = {
   navSecondary: [
     {
       title: "My Requests",
-      url: "my_requests",
+      url: "/dashboard/my_requests",
       icon: LifeBuoy,
     },
     // {

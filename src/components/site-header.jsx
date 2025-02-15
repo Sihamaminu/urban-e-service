@@ -14,7 +14,7 @@ import { ModeToggle } from "@/components/mode-toggle"
 export function SiteHeader() {
   const navigate = useNavigate()
   const pathname = window.location.pathname
-  const isAuthPage = pathname === "/signin" || pathname === "/register"
+  const isAuthPage = pathname === "/login" || pathname === "/register"
 
 
   return (
@@ -63,7 +63,7 @@ export function SiteHeader() {
       <ScrollButton label="Contact Us" path="/" sectionId="contactus" />
     </div>
             <Button variant="ghost" size="sm" asChild>
-              <Link to="/signin">Log in</Link>
+              <Link to="/login">Log in</Link>
             </Button>
             {/* <Button size="sm" asChild>
               <Link to="/register">Get Started</Link>

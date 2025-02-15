@@ -9,11 +9,11 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <div className="min-h-screen bg-background antialiased">
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <BrowserRouter>
+      {/* <BrowserRouter> */}
         <div>
         <App />
         </div>
-      </BrowserRouter>
+      {/* </BrowserRouter> */}
       
     </ThemeProvider>
     </div>

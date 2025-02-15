@@ -14,7 +14,7 @@ import { Link, useNavigate } from "react-router-dom"
 import axios from "axios"
 import {jwtDecode} from 'jwt-decode';
 
-export function LoginForm({ className, ...props }) {
+export default function LoginForm({ className, ...props }) {
   const navigate = useNavigate()
   const [email, setEmail] = useState("")
   const [phoneNumber, setPhoneNumber] = useState("")

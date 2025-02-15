@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 export const AboutUs = () => (
-  <div className="w-full ">
+  <div className="w-full h-screen">
     <div className="container mx-auto">
       <div className="flex text-center justify-center items-center gap-4 flex-col">
         <Badge>About Us</Badge>

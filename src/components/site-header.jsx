@@ -16,6 +16,7 @@ export function SiteHeader() {
   const pathname = window.location.pathname
   const isAuthPage = pathname === "/signin" || pathname === "/register"
 
+
   return (
     <motion.header
       initial={{ y: -100 }}
@@ -37,7 +38,7 @@ export function SiteHeader() {
         
         {/* {!isAuthPage && ( */}
           <div className="flex items-center space-x-4">
-            <NavigationMenu className="hidden md:flex text-right">
+            {/* <NavigationMenu className="hidden md:flex text-right">
           <NavigationMenuList>
           <NavigationMenuItem>
               <NavigationMenuLink asChild>
@@ -55,8 +56,12 @@ export function SiteHeader() {
               </NavigationMenuLink>
             </NavigationMenuItem>
           </NavigationMenuList>
-        </NavigationMenu>
-        
+        </NavigationMenu> */}
+         <div className="flex space-x-4">
+      <ScrollButton label="About Us" path="/" sectionId="aboutus" />
+      <ScrollButton label="Services" path="/" sectionId="services" />
+      <ScrollButton label="Contact Us" path="/" sectionId="contactus" />
+    </div>
             <Button variant="ghost" size="sm" asChild>
               <Link to="/signin">Log in</Link>
             </Button>
@@ -72,3 +77,19 @@ export function SiteHeader() {
     </motion.header>
   )
 }
+
+function ScrollButton({ label, path, sectionId }) {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate(`${path}#${sectionId}`);
+  };
+
+  return (
+    <Button variant="ghost" size="sm" onClick={handleClick}>
+      {label}
+    </Button>
+  );
+}
+
+export default ScrollButton;

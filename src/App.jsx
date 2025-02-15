@@ -29,14 +29,29 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
+import { useEffect, useState } from "react"
+import { useLocation } from 'react-router-dom';
 
 
 
 export default function App() {
+
+  const { hash } = useLocation();
+
+  useEffect(() => {
+    if (hash) {
+      const element = document.querySelector(hash);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, [hash]);
+
+
   return (
     <div className="relative flex min-h-screen flex-col">
       <SiteHeader />
-      <main className="flex-1">
+      <main className="flex-1" id="home"> 
         {/* <section className="flex min-h-screen flex-col items-center justify-center space-y-10 py-24">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -192,7 +207,9 @@ export default function App() {
           </div>
         </section> */}
 
+        <section id="aboutus" className="lg:pt-28">
         <AboutUs />
+        </section>
 
 
         <Separator />
@@ -202,7 +219,7 @@ export default function App() {
 <Separator />
 
   <div className="flex items-center justify-center">
-  <section id="pricing" className="container  lg:py-10 ">
+  <section id="services" className="container  lg:py-20 ">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -303,8 +320,10 @@ export default function App() {
       </main>
       {/* <Footer /> */}
 
+<section id="contactus">
 <Footer1 />
       
+</section>
     </div>
   )
 }

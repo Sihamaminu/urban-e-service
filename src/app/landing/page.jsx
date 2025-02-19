@@ -30,13 +30,15 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { useEffect, useState } from "react"
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 
 
 export default function Landing() {
 
   const { hash } = useLocation();
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (hash) {
@@ -262,7 +264,7 @@ export default function Landing() {
 
                   <Dialog>
   <DialogTrigger>
-    <Button className="mt-8 w-full">{plan.buttonText}<MoveRight className="w-4 h-4" /></Button>
+    <Button  className="mt-8 w-full bg-primary text-white hover:text-primary hover:bg-primary/90">{plan.buttonText}<MoveRight className="w-4 h-4" /></Button>
     </DialogTrigger>
   <DialogContent>
     <DialogHeader>
@@ -276,6 +278,9 @@ export default function Landing() {
     <AccordionTrigger>{feature}</AccordionTrigger>
     <AccordionContent>
       {feature}
+      <Button className="mt-8 w-full bg-primary text-white hover:text-primary hover:bg-primary/90" onClick={() => navigate("/login")}>
+        Apply
+      </Button>
     </AccordionContent>
   </AccordionItem>
 ))}
@@ -309,10 +314,10 @@ export default function Landing() {
           >
             <h2 className="text-3xl font-bold leading-[1.1] sm:text-3xl md:text-5xl text-primary">Ready to get started?</h2>
             <p className="max-w-[85%] leading-normal text-muted-foreground sm:text-lg sm:leading-7">
-              Create your first Discord bot in minutes. No credit card required.
+              Apply to your Service
             </p>
-            <Button size="lg" className="mt-4">
-              Start Building Now
+            <Button size="lg" className="mt-4 w-full bg-primary text-white hover:text-primary hover:bg-primary/90" onClick={() => navigate("/login")}>
+              Start Applying Now
             </Button>
           </motion.div>
         </section>

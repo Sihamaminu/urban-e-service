@@ -32,7 +32,7 @@ export function SiteHeader() {
             transition={{ delay: 0.5 }}
             className="text-2xl font-bold"
           >
-             <img src="./yegna.jpeg" width={75} height={75} style={{border: 0}} />
+             <img src="./yegna.png" width={75} height={75} style={{border: 0}} />
           </motion.span>
         </Link>
         

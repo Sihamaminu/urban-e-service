@@ -34,19 +34,19 @@ export default function Page() {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="flex h-16 items-center gap-2 px-4 bg-gray-50 shadow-sm">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="h-4 mx-2" />
+        <header className="flex h-16 items-center gap-2 px-4 bg-gray-50 shadow-sm bg-primary">
+          <SidebarTrigger className="-ml-1 text-foreground" />
+          <Separator orientation="vertical" className="h-4 mx-2 bg-foreground" />
           <Breadcrumb className="flex-1"> {/* Makes Breadcrumb stretch */}
-            {/* <BreadcrumbList className="flex gap-2">
+            <BreadcrumbList className="flex gap-2 text-foreground text-lg">
               <BreadcrumbItem>
-                <BreadcrumbLink href="#">Building Your Application</BreadcrumbLink>
+                <BreadcrumbLink href="#">Yegna Property Management System</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>Data Fetching</BreadcrumbPage>
+                <BreadcrumbPage><span className="text-foreground">Ministry of Urban & Infrastructure e-Service</span></BreadcrumbPage>
               </BreadcrumbItem>
-            </BreadcrumbList> */}
+            </BreadcrumbList>
           </Breadcrumb>
         </header>
 

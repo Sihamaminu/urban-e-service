@@ -250,68 +250,57 @@ debugger;
             Search
           </Button>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <Controller
-              control={control}
-              name="city"
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  type="text"
-                  placeholder="City"
-                  disabled={isDisabled}
-                />
-              )}
-            />
-            <Controller
-              control={control}
-              name="subCity"
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  type="text"
-                  placeholder="Sub City"
-                  disabled={isDisabled}
-                />
-              )}
-            />
-            <Controller
-              control={control}
-              name="wereda"
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  type="text"
-                  placeholder="Wereda/Kebele"
-                  disabled={isDisabled}
-                />
-              )}
-            />
-            <Controller
-              control={control}
-              name="streetNumber"
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  type="text"
-                  placeholder="Street Number"
-                  disabled={isDisabled}
-                />
-              )}
-            />
-            <Controller
-              control={control}
-              name="houseNumber"
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  type="text"
-                  placeholder="House Number"
-                  disabled={isDisabled}
-                />
-              )}
-            />
-          </form>
+          <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
+  <div>
+    <div className='pb-2'>
+    <Controller
+      control={control}
+      name="city"
+      
+      render={({ field }) => (
+        <Input {...field} type="text" placeholder="City" disabled={isDisabled} />
+      )}
+    />
+    </div>
+    <div className='pb-2'>
+    <Controller
+      control={control}
+      name="wereda"
+      render={({ field }) => (
+        <Input {...field} type="text" placeholder="Wereda/Kebele" disabled={isDisabled} />
+      )}
+    />
+    </div>
+    <div className='pb-2'>
+    <Controller
+      control={control}
+      name="houseNumber"
+      render={({ field }) => (
+        <Input {...field} type="text" placeholder="House Number" disabled={isDisabled} />
+      )}
+    />
+    </div>
+  </div>
+  <div>
+    <div className='pb-2'>
+    <Controller
+      control={control}
+      name="subCity"
+      render={({ field }) => (
+        <Input {...field} type="text" placeholder="Sub City" disabled={isDisabled} />
+      )}
+    />
+    </div>
+    <Controller
+      control={control}
+      name="streetNumber"
+      render={({ field }) => (
+        <Input {...field} type="text" placeholder="Street Number" disabled={isDisabled} />
+      )}
+    />
+  </div>
+</form>
+
         </div>
       );
    
@@ -464,7 +453,7 @@ debugger;
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-center">
-          <h2 className="scroll-m-20  pb-2 text-3xl font-semibold tracking-tight first:mt-0">
+          <h2 className="scroll-m-20  pb-2 text-4xl font-semibold tracking-tight first:mt-0 text-primary">
           Building Permit Application
     </h2>
           </CardTitle>

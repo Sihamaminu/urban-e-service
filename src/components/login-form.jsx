@@ -13,8 +13,12 @@ import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import axios from "axios"
 import {jwtDecode} from 'jwt-decode';
+import { useToast } from "@/hooks/use-toast"
 
 export default function LoginForm({ className, ...props }) {
+
+  const { toast } = useToast()
+
   const navigate = useNavigate()
   const [email, setEmail] = useState("")
   const [phoneNumber, setPhoneNumber] = useState("")
@@ -59,11 +63,26 @@ export default function LoginForm({ className, ...props }) {
   localStorage.setItem('userPayload', JSON.stringify(decodedPayload));
   console.log('Token and payload stored successfully:', decodedPayload);
 
+   // Show success toast
+   toast({
+    title: "Success",
+    description: "Logged in successfully",
+    variant: "success",
+    className: "bg-primary text-secondary",
+  })
+
       // Redirect to dashboard on success
       navigate("/dashboard")
     } catch (error) {
       console.error("Error during login:", error)
       alert("Invalid credentials! Please try again.")
+      
+      toast({
+        title: "Error",
+        description: "Login failed. Please try again.",
+        variant: "destructive",
+      })
+
     } finally {
       setLoading(false)
     }

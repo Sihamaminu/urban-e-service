@@ -1,6 +1,6 @@
 
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,21 +22,10 @@ import { useToast } from "@/hooks/use-toast"
 
 import { useForm, Controller } from 'react-hook-form';
 import axios from 'axios';
-import PaymentForm from './PaymentForm';
-import BuildingPermitCertificate from './BuildingPermitCertificate';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 
-function StepperForm() {
-
-  //
-  const [isApproved, setIsApproved] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  const [workflowSteps, setWorkflowSteps] = useState([]);  
-
-  
-
-  //
+function PlanAgreementForm() {
 
   const API_URL = import.meta.env.VITE_API_URL;
 
@@ -80,7 +69,7 @@ function StepperForm() {
     const payload = {
       serviceId:   "67a8b6367790b30993406c31", //formData.serviceId,  // Replace with your actual form field name
       subServiceId:  "67a8b7097790b30993406c36", //formData.subServiceId,  // Replace with your actual form field name
-      applicationDetails: formData  // Replace with your actual form field name
+      applicationDetails: "formData"  // Replace with your actual form field name
     };
 
     var apiUrl = `${API_URL}/application/apply`; //?userId=${theuserid}`
@@ -137,6 +126,7 @@ debugger;
           setValue('wereda', plot.address.woreda);
           setValue('streetNumber', plot.address.kebele);
           setValue('houseNumber', plot.address.houseNumber);
+          setValue('plotNumber', plot.plotNumber);
           setIsDisabled(true);
           toast({ description: 'Data retrieved successfully!' });
         } else {
@@ -157,40 +147,6 @@ debugger;
 
 
 
-  useEffect(() => {
-    const fetchApplicationStatus = async () => {
-      try {
-        // const userId = "67a663226d5844cad732d0b5"; // Replace with dynamic user ID
-        const userId = localStorage.getItem("userId");
-        const response = await axios.get(`${API_URL}/application/user/${userId}`);
-        const data = response.data;
-
-        if (data.status === "success" && data.applications.length > 0) {
-          const application = data.applications[0]; // Assuming only one application is relevant
-          const { currentStep, workflowSteps } = application;
-
-          setWorkflowSteps(workflowSteps); 
-
-          const currentWorkflowStep = workflowSteps.find(step => step.stepName === currentStep.toString());
-
-          if (currentWorkflowStep && currentWorkflowStep.status === "Approved") {
-            setIsApproved(true);
-          }
-        }
-      } catch (error) {
-        setIsApproved(true);
-        console.error("Error fetching application status:", error);
-        toast({ description: "Failed to fetch application status." });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchApplicationStatus();
-  }, []);
-
-  if (loading) return <p>Loading...</p>;
-
   const StepContent = () => {
     switch (currentStep) {
       case 1:
@@ -198,7 +154,7 @@ debugger;
       return (
         <div className="space-y-4">
           <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
-            Step 1: Address where construction will take place
+            Step 1: The address where the construction will take place
           </h3>
 
           <div className="flex justify-between items-center gap-4">
@@ -276,7 +232,7 @@ debugger;
       control={control}
       name="subCity"
       render={({ field }) => (
-        <Input {...field} type="text" placeholder="Sub City" disabled /> // disabled={isDisabled} />
+        <Input {...field} type="text" placeholder="Sub City" disabled /> //disabled={isDisabled} />
       )}
     />
     </div>
@@ -289,13 +245,13 @@ debugger;
       )}
     />
     </div>
-    <Controller
-          control={control}
-          name="plotNumber"
-          render={({ field }) => (
-            <Input {...field} type="text" placeholder="Plot Number" disabled /> // disabled={isDisabled} />
-          )}
-        />
+     <Controller
+      control={control}
+      name="plotNumber"
+      render={({ field }) => (
+        <Input {...field} type="text" placeholder="Plot Number" disabled /> //  disabled={isDisabled} />
+      )}
+    />
   </div>
 </form>
 
@@ -306,7 +262,7 @@ debugger;
         return (
           <div className="space-y-4">
             <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
-            Step 2: Construction Service for which a Building Permit is requested
+            Step 2: Construction services for which the Plan Agreement is requested
     </h3>
 
     <Controller
@@ -329,13 +285,29 @@ debugger;
                       <SelectItem value="warehouse">Warehouse</SelectItem>
                       <SelectItem value="healthcare">Health Care</SelectItem>
                       <SelectItem value="school">School</SelectItem>
-                      <SelectItem value="infrastructure">Infrastructure</SelectItem>
                       <SelectItem value="others">Others</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
               )}
             />
+
+<div className="text-center text-sm ">
+    Height and Depth of the building in meters.
+  </div>
+                <div className="flex justify-between items-center gap-4">
+                <Input type="text" placeholder="Height above the ground" {...control.register('heightAboveGround')} />
+                <Input type="text" placeholder="Depth below the ground" {...control.register('depthBelowGroundInMeters')} />
+                </div>
+                <div className="text-center text-sm ">
+    Number of floors
+  </div>
+                <div className="flex justify-between items-center gap-4">
+                <Input type="text" placeholder="Above ground" {...control.register('numberOfFloorsAboveGround')} />
+                <Input type="text" placeholder="Below ground" {...control.register('numberOfFloorsBelowGround')} />
+                </div>
+                
+                
 
           
           </div>
@@ -344,7 +316,7 @@ debugger;
         return (
           <div className="space-y-4">
             <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
-            Step 3: Building Type
+            Step 3: The type of construction for which Plan's consent is requested
     </h3>
     <Controller
               name="buildingType"
@@ -365,7 +337,7 @@ debugger;
               )}
             />
 
-    <Input type="text" placeholder="Previous building permit number, if existing" {...control.register('previousPermit')} />
+    <Input type="text" placeholder="Building Permit number" {...control.register('previousPermit')} />
 
 
     {/* Date of issue of the permit
@@ -377,21 +349,15 @@ debugger;
                 </div>
 
                 <Input type="text" placeholder="Construction cost" {...control.register('constructionCost')} />
-
-
-                <div>
-                <Input type="text" placeholder="Number of floors" {...control.register('floors')} />
+                {/* <Input type="text" placeholder="Number of floors" {...control.register('floors')} />
                 <Input type="text" placeholder="Height above ground in meters" {...control.register('heightAboveGround')} />
-                </div>
-
-
                 <Input type="text" placeholder="Number of floors below ground" {...control.register('numberOfFloorsBelowGround')} />
-                <Input type="text" placeholder="Depth below ground in meters" {...control.register('depthBelowGroundInMeters')} />
+                <Input type="text" placeholder="Depth below ground in meters" {...control.register('depthBelowGroundInMeters')} /> */}
 
-                <div className="grid w-full gap-1.5">
+                {/* <div className="grid w-full gap-1.5">
       <Label htmlFor="message">Detailed description of construction content on the boundary</Label>
       <Textarea placeholder="Type your message here." id="message" />
-    </div>
+    </div> */}
 
 
           </div>
@@ -400,23 +366,21 @@ debugger;
         return (
           <div className="space-y-4">
             <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
-            Step 4: The Consulting Firm
+            Step 4: If the Requested Plan's Consent is New 
     </h3>
-    <Input type="text" placeholder="Name" {...control.register('consultingFirmName')} />
+    {/* <Input type="text" placeholder="Name" {...control.register('consultingFirmName')} />
                 <Input type="text" placeholder="Level" {...control.register('firmLevel')} />
                 <Input type="text" placeholder="Address" {...control.register('firmAddress')} />
-                <Input type="tel" placeholder="Phone Number" {...control.register('firmPhone')} />
+                <Input type="tel" placeholder="Phone Number" {...control.register('firmPhone')} /> */}
             
-                
-
-                <div className="grid w-full gap-1.5">
+                {/* <div className="grid w-full gap-1.5">
       <Label htmlFor="message">Type of design submitted for building permit</Label>
       <Textarea placeholder="Type your message here." id="message" />
-    </div>
+    </div> */}
 
 
 
-    <div className="items-top flex space-x-2">
+    {/* <div className="items-top flex space-x-2">
       <Checkbox id="terms1" {...control.register('terms')} />
       <div className="grid gap-1.5 leading-none">
         <label
@@ -429,200 +393,136 @@ debugger;
           You agree to our Terms of Service and Privacy Policy.
         </p>
       </div>
-    </div>
+    </div> */}
 
 
-    <Input type="text" placeholder="Name of the applicant for the building permit" {...control.register('nameOfApplicant')} />
+    {/* <Input type="text" placeholder="Name of the applicant for the building permit" {...control.register('nameOfApplicant')} />
     <Input type="text" placeholder="Phone Number" {...control.register('phoneNumber')}/>
     <Input type="text" placeholder="TIN Number" {...control.register('tinNumber')}/>
     <Input type="text" placeholder="Sign" {...control.register('sign')}/>
     <div className="grid w-full max-w-sm items-center gap-1.5">
                 <Label htmlFor="date">Date</Label>
                 <Input type="date" id="date" placeholder="Date of issue of building permit" {...control.register('dateOfIssueOfPermit')} />
-                </div>
+                </div> */}
+
+
+<Card className="w-full max-w-md">
+      <CardHeader>
+        <h3 className="text-lg font-semibold">Select Build Type</h3>
+      </CardHeader>
+      <CardContent>
+        <RadioGroup {...control.register("buildType")}>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem id="builtOneByOne" value="one_by_one" />
+            <label
+              htmlFor="builtOneByOne"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Built one by one
+            </label>
+          </div>
+          <div className="flex items-center space-x-2 mt-2">
+            <RadioGroupItem id="builtOnce" value="once" />
+            <label
+              htmlFor="builtOnce"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Built once
+            </label>
+          </div>
+        </RadioGroup>
+      </CardContent>
+    </Card>
+
+
+    <div>
+    <Label htmlFor="tenure" className="my-2" >Date of issue of building permit</Label>
+    <Input className="my-2" id="tenure" type="text" placeholder="Tenure Certificate Number" {...control.register('tenureCertNum')} />
+    </div>
+
             
           </div>
         );
+
+    
+
 
       default:
         return null;
     }
   };
 
-
   return (
-    <div>
-      {workflowSteps.every(step => step.status === "Pending") ? ( 
-        // Case 1: All workflow stages are pending
-        <div className="flex flex-col items-center justify-center h-screen">
-          <h2 className="text-xl font-semibold">Waiting for Approval</h2>
-          <p className="text-gray-500">Your application is currently under review.</p>
-          <Button onClick={() => window.location.reload()} className="mt-4">
-            Refresh Status
-          </Button>
-        </div>
-      ) : currentStep === 1 && isApproved ? ( 
-        // Case 2: If currentStep is 1 and approved, show the Payment Form
-        <PaymentForm />
-      ) : currentStep === 2 && isApproved ? ( 
-        // Case 3: If currentStep is 2 and approved, show the Certificate
-        <BuildingPermitCertificate />
-      ) : (
-        // Default case: Show the Permit Application Form
-        <div className=" flex items-center justify-center p-4">
-          <Card className="w-full max-w-md">
-            <CardHeader>
-              <CardTitle className="text-center">
-                <h2 className="scroll-m-20  pb-2 text-4xl font-semibold tracking-tight first:mt-0 text-primary">
-                  Building Permit Application
-                </h2>
-              </CardTitle>
-            </CardHeader>
-            <Separator />
-            <CardContent className="pt-6">
-              <div className="flex justify-between items-center mb-8">
-                {[1, 2, 3, 4].map((step) => (
-                  <React.Fragment key={step}>
-                    <div className="flex flex-col items-center">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className={`h-8 w-8 rounded-full p-0 ${
-                          step <= currentStep
-                            ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                            : 'bg-muted text-muted-foreground'
-                        }`}
-                        aria-label={`Step ${step}`}
-                      >
-                        {step}
-                      </Button>
-                    </div>
-                    {step < 4 && (
-                      <div
-                        className={`flex-1 h-[2px] ${
-                          step < currentStep ? 'bg-primary' : 'bg-muted'
-                        }`}
-                        aria-hidden="true"
-                      />
-                    )}
-                  </React.Fragment>
-                ))}
-              </div>
-  
-              <form onSubmit={(e) => e.preventDefault()}>
-                <StepContent />
-  
-                <div className="mt-8 flex justify-between">
+    <div className=" flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-center">
+          <h2 className="scroll-m-20  pb-2 text-4xl font-semibold tracking-tight first:mt-0 text-primary">
+          Plan Agreement Form
+    </h2>
+          </CardTitle>
+        </CardHeader>
+        <Separator />
+        <CardContent className="pt-6">
+          <div className="flex justify-between items-center mb-8">
+            {[1, 2, 3, 4].map((step) => (
+              <React.Fragment key={step}>
+                <div className="flex flex-col items-center">
                   <Button
-                    variant="secondary"
-                    onClick={prevStep}
-                    disabled={currentStep === 1}
-                    className={currentStep === 1 ? 'invisible' : ''}
+                    variant="ghost"
+                    size="sm"
+                    className={`h-8 w-8 rounded-full p-0 ${
+                      step <= currentStep
+                        ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                        : 'bg-muted text-muted-foreground'
+                    }`}
+                    aria-label={`Step ${step}`}
                   >
-                    Previous
-                  </Button>
-                  <Button
-                    type={currentStep === 4 ? 'submit' : 'button'}
-                    onClick={currentStep !== 4 ? nextStep : onSubmit}
-                  >
-                    {currentStep === 4 ? 'Submit' : 'Next'}
+                    {step}
                   </Button>
                 </div>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+                {step < 4 && (
+                  <div
+                    className={`flex-1 h-[2px] ${
+                      step < currentStep ? 'bg-primary' : 'bg-muted'
+                    }`}
+                    aria-hidden="true"
+                  />
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+
+          <form onSubmit={(e) => e.preventDefault()}>
+          <StepContent />
+
+          <div className="mt-8 flex justify-between">
+            <Button
+              variant="secondary"
+              onClick={prevStep}
+              disabled={currentStep === 1}
+              className={currentStep === 1 ? 'invisible' : ''}
+            >
+              Previous
+            </Button>
+            {/* <Button
+              onClick={nextStep}
+              // disabled={currentStep === 4}
+            >
+              {currentStep === 4 ? 'Submit' : 'Next'}
+            </Button> */}
+            <Button
+                type={currentStep === 4 ? 'submit' : 'button'}
+                onClick={currentStep !== 4 ? nextStep : onSubmit}
+              >
+                {currentStep === 4 ? 'Submit' : 'Next'}
+              </Button>
+          </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
-  
-
-  // return (
-  //   <div>
-  //     {isApproved ? (
-  //       <div className=" flex items-center justify-center p-4">
-  //       <Card className="w-full max-w-md">
-  //         <CardHeader>
-  //           <CardTitle className="text-center">
-  //           <h2 className="scroll-m-20  pb-2 text-4xl font-semibold tracking-tight first:mt-0 text-primary">
-  //           Building Permit Application
-  //     </h2>
-  //           </CardTitle>
-  //         </CardHeader>
-  //         <Separator />
-  //         <CardContent className="pt-6">
-  //           <div className="flex justify-between items-center mb-8">
-  //             {[1, 2, 3, 4].map((step) => (
-  //               <React.Fragment key={step}>
-  //                 <div className="flex flex-col items-center">
-  //                   <Button
-  //                     variant="ghost"
-  //                     size="sm"
-  //                     className={`h-8 w-8 rounded-full p-0 ${
-  //                       step <= currentStep
-  //                         ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-  //                         : 'bg-muted text-muted-foreground'
-  //                     }`}
-  //                     aria-label={`Step ${step}`}
-  //                   >
-  //                     {step}
-  //                   </Button>
-  //                 </div>
-  //                 {step < 4 && (
-  //                   <div
-  //                     className={`flex-1 h-[2px] ${
-  //                       step < currentStep ? 'bg-primary' : 'bg-muted'
-  //                     }`}
-  //                     aria-hidden="true"
-  //                   />
-  //                 )}
-  //               </React.Fragment>
-  //             ))}
-  //           </div>
-  
-  //           <form onSubmit={(e) => e.preventDefault()}>
-  //           <StepContent />
-  
-  //           <div className="mt-8 flex justify-between">
-  //             <Button
-  //               variant="secondary"
-  //               onClick={prevStep}
-  //               disabled={currentStep === 1}
-  //               className={currentStep === 1 ? 'invisible' : ''}
-  //             >
-  //               Previous
-  //             </Button>
-  //             {/* <Button
-  //               onClick={nextStep}
-  //               // disabled={currentStep === 4}
-  //             >
-  //               {currentStep === 4 ? 'Submit' : 'Next'}
-  //             </Button> */}
-  //             <Button
-  //                 type={currentStep === 4 ? 'submit' : 'button'}
-  //                 onClick={currentStep !== 4 ? nextStep : onSubmit}
-  //               >
-  //                 {currentStep === 4 ? 'Submit' : 'Next'}
-  //               </Button>
-  //           </div>
-  //           </form>
-  //         </CardContent>
-  //       </Card>
-  //     </div>
-  //     ) : (
-  //       <div className="flex flex-col items-center justify-center h-screen">
-  //         <h2 className="text-xl font-semibold">Waiting for Approval</h2>
-  //         <p className="text-gray-500">Your application is currently under review.</p>
-  //         <Button onClick={() => window.location.reload()} className="mt-4">
-  //           Refresh Status
-  //         </Button>
-  //       </div>
-  //     )}
-  //   </div>
-  // );
-
-
-
 }
 
-export default StepperForm;
+export default PlanAgreementForm;

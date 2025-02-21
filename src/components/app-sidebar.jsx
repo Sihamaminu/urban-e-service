@@ -59,12 +59,16 @@ const data = {
       icon: Bot,
       items: [
         {
+          title: "Plan Agreement Form",
+          url: "/dashboard/plan_agreement",
+        },
+        {
           title: "Building Permit",
           url: "/dashboard/building_permit",
         },
         {
           title: "Demolition Permit",
-          url: "/dashboard/demolition_permit",
+          url: "#",
         },
         {
           title: "Night Construction Permit",
@@ -76,7 +80,7 @@ const data = {
         },
         {
           title: "Replacement Certificate Service",
-          url: "#",
+          url: "/dashboard/replacement_certificate",
         },
       ],
     },

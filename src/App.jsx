@@ -7,6 +7,8 @@ import StepperForm from "@/components/StepperForm"
 import TestComponent from "@/components/TestComponent"
 import MyRequests from "@/components/MyRequests"
 import MyApplications from "@/components/MyApplications"
+import PlanAgreementForm from "@/components/PlanAgreementForm"
+import BuildingPermitCertificate from "@/components/BuildingPermitCertificate"
 
 
 
@@ -19,8 +21,10 @@ import MyApplications from "@/components/MyApplications"
         <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<RegisterForm />} />
         <Route path="/dashboard" element={<Dashboard />}>
+        <Route path="plan_agreement" element={<PlanAgreementForm />} />
         <Route path="building_permit" element={<StepperForm />} />
-        <Route path="demolition_permit" element={<TestComponent />} />
+        <Route path="replacement_certificate" element={<BuildingPermitCertificate />} />
+        {/* <Route path="demolition_permit" element={<TestComponent />} /> */}
         {/* <Route path="my_requests" element={<MyRequests />} /> */}
         <Route path="my_requests" element={<MyApplications />} />
         </Route>

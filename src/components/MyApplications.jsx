@@ -17,9 +17,16 @@ const MyApplications = () => {
 
   // Fetch applications from the API
   useEffect(() => {
+    debugger;
+    const userId = localStorage.getItem("userId");
     const fetchApplications = async () => {
+      if (!userId) {
+        console.error("User ID not found in localStorage");
+        return;
+      }
       try {
-        const response = await axios.get("http://localhost:4023/api/application");
+        // const response = await axios.get("http://localhost:4023/api/application");
+        const response = await axios.get(`http://localhost:4023/api/application/user/${userId}`);
         if (response.data.status === "success") {
           setApplications(response.data.applications);
         }

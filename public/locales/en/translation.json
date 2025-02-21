@@ -1,0 +1,5 @@
+{
+    "welcome": "Welcome to our application!",
+    "changeLanguage": "Change Language",
+    "description": "This is a sample React application with localization."
+  }

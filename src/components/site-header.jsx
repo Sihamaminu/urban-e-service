@@ -11,7 +11,19 @@ import {
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/mode-toggle"
 
+import { useTranslation } from 'react-i18next';
+
+
 export function SiteHeader() {
+
+
+  const { t, i18n } = useTranslation();
+  
+    const changeLanguage = (lng) => {
+      i18n.changeLanguage(lng); // Change the language
+    };
+
+  
   const navigate = useNavigate()
   const pathname = window.location.pathname
   const isAuthPage = pathname === "/login" || pathname === "/register"
@@ -65,6 +77,12 @@ export function SiteHeader() {
             <Button variant="ghost" size="sm" asChild>
               <Link to="/login">Log in</Link>
             </Button>
+            <div className="App">
+      {/* <h1>{t('welcome')}</h1>
+      <p>{t('description')}</p> */}
+      <button onClick={() => changeLanguage('en')}>English</button>
+      <button onClick={() => changeLanguage('am')}>አማርኛ</button>
+    </div>
             {/* <Button size="sm" asChild>
               <Link to="/register">Get Started</Link>
             </Button> */}

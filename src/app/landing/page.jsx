@@ -31,10 +31,17 @@ import {
 } from "@/components/ui/accordion"
 import { useEffect, useState } from "react"
 import { useLocation, useNavigate } from 'react-router-dom';
-
+import { useTranslation } from 'react-i18next';
 
 
 export default function Landing() {
+
+  const { t, i18n } = useTranslation();
+
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng); // Change the language
+  };
+  
 
   const { hash } = useLocation();
 
@@ -52,6 +59,11 @@ export default function Landing() {
 
   return (
     <div className="relative flex min-h-screen flex-col">
+      <div className="App">
+      
+      {/* <button onClick={() => changeLanguage('en')}>English</button>
+      <button onClick={() => changeLanguage('am')}>አማርኛ</button> */}
+    </div>
       <SiteHeader />
       <main className="flex-1" id="home"> 
         {/* <section className="flex min-h-screen flex-col items-center justify-center space-y-10 py-24">
@@ -107,6 +119,8 @@ export default function Landing() {
         {/* <Hero5 /> */}
 
         <Hero3 />
+        <h1>{t('welcome')}</h1>
+      <p>{t('description')}</p>
         {/* <section className="flex min-h-screen flex-col items-center justify-center space-y-10 py-24">
         <Hero3 />
         </section> */}

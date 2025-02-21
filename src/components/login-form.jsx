@@ -14,8 +14,11 @@ import { Link, useNavigate } from "react-router-dom"
 import axios from "axios"
 import {jwtDecode} from 'jwt-decode';
 import { useToast } from "@/hooks/use-toast"
+import {Home}  from "lucide-react"
 
 export default function LoginForm({ className, ...props }) {
+
+  const API_URL = import.meta.env.VITE_API_URL;
 
   const { toast } = useToast()
 
@@ -39,7 +42,7 @@ export default function LoginForm({ className, ...props }) {
 
     try {
       // Replace this URL with your API's login endpoint
-      const response = await axios.post("http://localhost:4023/api/user/login", {
+      const response = await axios.post(`${API_URL}/user/login`, {
         email,
         phoneNumber,
         password,
@@ -61,6 +64,7 @@ export default function LoginForm({ className, ...props }) {
       localStorage.setItem("user", JSON.stringify(user))
       const decodedPayload = jwtDecode(token);
   localStorage.setItem('userPayload', JSON.stringify(decodedPayload));
+  localStorage.setItem("userId", decodedPayload.id);
   console.log('Token and payload stored successfully:', decodedPayload);
 
    // Show success toast
@@ -90,6 +94,13 @@ export default function LoginForm({ className, ...props }) {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-muted p-6 md:p-10">
+       {/* Header with Home Icon */}
+       <div className="absolute top-4 left-4">
+        <Link to="/" className="flex items-center gap-2 text-primary hover:text-primary">
+          <Home size={24} />
+          <span className="text-lg font-semibold">Home</span>
+        </Link>
+      </div>
       <div className="w-full max-w-sm md:max-w-3xl"></div>
       <div className={cn("flex flex-col gap-6", className)} {...props}>
         <Card>

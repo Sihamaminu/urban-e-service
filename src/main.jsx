@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster"
 import { ToastProvider } from "@/components/ui/toast"
+import './i18n'; 
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

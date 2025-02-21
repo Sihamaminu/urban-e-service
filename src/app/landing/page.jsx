@@ -119,8 +119,8 @@ export default function Landing() {
         {/* <Hero5 /> */}
 
         <Hero3 />
-        <h1>{t('welcome')}</h1>
-      <p>{t('description')}</p>
+        {/* <h1>{t('welcome')}</h1>
+      <p>{t('description')}</p> */}
         {/* <section className="flex min-h-screen flex-col items-center justify-center space-y-10 py-24">
         <Hero3 />
         </section> */}

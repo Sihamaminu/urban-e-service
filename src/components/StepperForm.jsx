@@ -24,6 +24,7 @@ import { useForm, Controller } from 'react-hook-form';
 import axios from 'axios';
 import PaymentForm from './PaymentForm';
 import BuildingPermitCertificate from './BuildingPermitCertificate';
+import { Commet } from 'react-loading-indicators';
 
 
 function StepperForm() {
@@ -189,8 +190,15 @@ debugger;
     fetchApplicationStatus();
   }, []);
 
-  if (loading) return <p>Loading...</p>;
+  // if (loading) return  <p>Loading...</p>;
 
+  if (loading)
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <Commet color="#32cd32" size="medium" text="Loading..." textColor="" />
+      </div>
+    );
+  
   const StepContent = () => {
     switch (currentStep) {
       case 1:

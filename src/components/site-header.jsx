@@ -80,8 +80,8 @@ export function SiteHeader() {
             <div className="App">
       {/* <h1>{t('welcome')}</h1>
       <p>{t('description')}</p> */}
-      <button onClick={() => changeLanguage('en')}>English</button>
-      <button onClick={() => changeLanguage('am')}>አማርኛ</button>
+      {/* <button onClick={() => changeLanguage('en')}>English</button>
+      <button onClick={() => changeLanguage('am')}>አማርኛ</button> */}
     </div>
             {/* <Button size="sm" asChild>
               <Link to="/register">Get Started</Link>

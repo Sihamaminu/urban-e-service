@@ -58,10 +58,10 @@ const data = {
       url: "#",
       icon: Bot,
       items: [
-        {
-          title: "Plan Agreement Form",
-          url: "/dashboard/plan_agreement",
-        },
+        // {
+        //   title: "Plan Agreement Form",
+        //   url: "/dashboard/plan_agreement",
+        // },
         {
           title: "Building Permit",
           url: "/dashboard/building_permit",
@@ -80,7 +80,8 @@ const data = {
         },
         {
           title: "Replacement Certificate Service",
-          url: "/dashboard/replacement_certificate",
+          url: "#"
+          // url: "/dashboard/replacement_certificate",
         },
       ],
     },

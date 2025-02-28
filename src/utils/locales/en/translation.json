@@ -1,0 +1,15 @@
+{
+    "welcomeMessage": "Welcome to our application!",
+    "aboutUs": "About Us",
+    "services": "Services",
+    "contactUs": "Contact Us",
+    "login": "Login",
+    "changeLanguage": "Change Language",
+    "description": "This is a sample React application with localization.",
+
+    "yegnaPropertyManagement": "Yegna Property Management System",
+    "eService": "e-Service",
+    "eServiceDescription": "The Electronic Service Designed by Yegna Property Management System For Urban and infrastructure was designed to provide digital public services to citizens, non-citizens, businesses, and both governmental and non-governmental organizations.",
+    "getServices": "Get Services"
+    
+  }

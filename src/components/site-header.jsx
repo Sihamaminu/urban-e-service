@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/mode-toggle"
 
 import { useTranslation } from 'react-i18next';
+import LanguageDropdown from "../utils/LanguageDropdown"
 
 
 export function SiteHeader() {
@@ -70,18 +71,19 @@ export function SiteHeader() {
           </NavigationMenuList>
         </NavigationMenu> */}
          <div className="flex space-x-4">
-      <ScrollButton label="About Us" path="/" sectionId="aboutus" />
-      <ScrollButton label="Services" path="/" sectionId="services" />
-      <ScrollButton label="Contact Us" path="/" sectionId="contactus" />
+      <ScrollButton label={t('aboutUs')} path="/" sectionId="aboutus" />
+      <ScrollButton label={t('services')} path="/" sectionId="services" />
+      <ScrollButton label={t('contactUs')} path="/" sectionId="contactus" />
     </div>
             <Button variant="ghost" size="sm" asChild>
-              <Link to="/login">Log in</Link>
+              <Link to="/login">{t('login')}</Link>
             </Button>
             <div className="App">
-      {/* <h1>{t('welcome')}</h1>
-      <p>{t('description')}</p> */}
+      {/* <h1>{t('welcomeMessage')}</h1> */}
+      {/* <p>{t('description')}</p> */}
       {/* <button onClick={() => changeLanguage('en')}>English</button>
       <button onClick={() => changeLanguage('am')}>አማርኛ</button> */}
+      <LanguageDropdown />
     </div>
             {/* <Button size="sm" asChild>
               <Link to="/register">Get Started</Link>

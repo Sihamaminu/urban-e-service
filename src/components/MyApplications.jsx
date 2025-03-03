@@ -11,20 +11,56 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import axios from "axios";
 import { Eye } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-
+import { Badge } from "@/components/ui/badge"; // Assuming you have a Badge component
+import { useToast } from "@/hooks/use-toast"; 
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 
 const API_URL = import.meta.env.VITE_API_URL;
+
+const BANK_OPTIONS = [
+  "teleBirr",
+  "Credit Card",
+  "CBE Birr",
+  "Amole",
+  "Chapa",
+  "Bank Transfer",
+  "PayPal",
+  "Mobile Money"
+];
 
 const MyApplications = () => {
   const [applications, setApplications] = useState([]);
   const [selectedApp, setSelectedApp] = useState(null);
 
+  const [selectedBank, setSelectedBank] = useState("");
 
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [applicationCode, setApplicationCode] = useState("");
   const [paymentDetails, setPaymentDetails] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const [transactionId, setTransactionId] = useState("");
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const { toast } = useToast();
+
+
+  const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null; // Cookie not found
+  };
+
+ 
 
   // Fetch applications from the API
   useEffect(() => {
@@ -51,7 +87,7 @@ const MyApplications = () => {
   const fetchPaymentDetails = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API_URL}/api/application/code?applicationCode=${applicationCode}`);
+      const response = await axios.get(`${API_URL}/application/code/${applicationCode}`);
       if (response.data.status === "success") {
         setPaymentDetails({
           application: response.data.application,
@@ -67,6 +103,54 @@ const MyApplications = () => {
       alert("Error fetching payment details");
     }
     setLoading(false);
+  };
+
+  const token = getCookie('accessToken');
+  const axiosConfig = {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    }
+  };
+
+  const updatePaymentStatus = async () => {
+    console.log(token)
+    setPaymentLoading(true);
+    try {
+      // const response = await axios.post(`${API_URL}/application/code/${applicationCode}/payment`, {
+      //   paymentStatus: "Paid",
+      //   transactionId: transactionId
+      // });
+      const response = await axios.post(
+        `${API_URL}/application/code/${applicationCode}/payment`,
+        {
+          paymentStatus: "Paid",
+          transactionId: transactionId,
+        },
+        axiosConfig
+      );
+      
+      if (response.data.status === "success") {
+        setPaymentDetails({
+          application: response.data.application,
+          payment: response.data.payment
+        });
+        toast({
+          title: "Payment Successful",
+          description: "Payment status has been updated successfully",
+          variant: "success"
+        });
+        setTransactionId(""); // Reset transaction ID input
+      }
+    } catch (error) {
+      console.error("Failed to update payment status:", error);
+      toast({
+        title: "Payment Failed",
+        description: error.response?.data?.message || "Error updating payment status",
+        variant: "destructive"
+      });
+    }
+    setPaymentLoading(false);
   };
 
   // Define table columns for applications
@@ -448,6 +532,52 @@ const MyApplications = () => {
                     <p><strong>Amount:</strong> {paymentDetails.payment.amount}</p>
                     <p><strong>Status:</strong> {paymentDetails.payment.status}</p>
                     <p><strong>Date:</strong> {new Date(paymentDetails.payment.createdAt).toLocaleString()}</p>
+
+
+{/* Conditional UI based on payment status */}
+{paymentDetails.payment.status === "Pending" && (
+                      <div className="mt-4 space-y-2">
+                        <h4 className="font-semibold">Complete Payment</h4>
+                        <div className="py-4">
+                        <Select
+                          value={selectedBank}
+                          onValueChange={setSelectedBank}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Bank" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {BANK_OPTIONS.map((bank) => (
+                              <SelectItem key={bank} value={bank}>
+                                {bank}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        </div>
+                        <Input
+                          placeholder="Enter Transaction ID"
+                          value={transactionId}
+                          onChange={(e) => setTransactionId(e.target.value)}
+                        />
+                        
+                        <Button
+                          onClick={updatePaymentStatus}
+                          disabled={paymentLoading || !transactionId}
+                        >
+                          {paymentLoading ? "Processing..." : "Pay Now"}
+                        </Button>
+                      </div>
+                    )}
+
+                    {paymentDetails.payment.status === "Completed" && (
+                      <Badge className="mt-2 bg-primary" variant="green-600">
+                        Payment Completed
+                      </Badge>
+                    )}
+
+
+
                   </>
                 ) : (
                   <p>No payment details available for this application.</p>

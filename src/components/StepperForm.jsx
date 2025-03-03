@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,6 +25,7 @@ import BuildingPermitCertificate from './BuildingPermitCertificate';
 import { Commet } from 'react-loading-indicators';
 import PlanAgreementForm from './PlanAgreementForm';
 import BuildingPermitCertrificate from './BuildingPermitCertificate';
+import FileUploadForm from './FileUploadForm';
 
 
 function StepperForm() {
@@ -37,7 +36,7 @@ function StepperForm() {
 
   const [workflowSteps, setWorkflowSteps] = useState([]);  
 
-  
+  const [hasData, setHasData] = useState(false);
 
   //
 
@@ -68,7 +67,6 @@ function StepperForm() {
 
   const onSubmit = async (data) => {
     try {
-      debugger;
 
     const formData = watch(); // Watch collects all data from all steps
     // You can handle form submission logic here
@@ -80,7 +78,10 @@ function StepperForm() {
     const userPayload = JSON.parse(localStorage.getItem('userPayload'));
     const theuserid = userPayload.id;
 
+    const userIdFromLocal = localStorage.getItem("userId");
+
     const payload = {
+      userId : userIdFromLocal,
       serviceId:   "67a8b6367790b30993406c31", //formData.serviceId,  // Replace with your actual form field name
       subServiceId:  "67a8b7097790b30993406c36", //formData.subServiceId,  // Replace with your actual form field name
       // applicationCode: "APP123456",
@@ -123,7 +124,6 @@ function StepperForm() {
   const handleSearch = async (plotNumber) => {
     try {
       plotNumber = plotNumber.toUpperCase()
-debugger;
       const token = localStorage.getItem('accessToken');
   const refreshToken = localStorage.getItem('refreshToken');
   const userPayload = JSON.parse(localStorage.getItem('userPayload'));
@@ -177,12 +177,18 @@ debugger;
 
           const currentWorkflowStep = workflowSteps.find(step => step.stepName === currentStep.toString());
 
+          setCurrentStep(parseInt(currentWorkflowStep));
+
           if (currentWorkflowStep && currentWorkflowStep.status === "Approved") {
             setIsApproved(true);
           }
+
+          setHasData(true);
         }
       } catch (error) {
-        setIsApproved(true);
+        setIsApproved(false);
+        setIsloading(false);
+        setHasData(false);
         console.error("Error fetching application status:", error);
         toast({ description: "Failed to fetch application status." });
       } finally {
@@ -390,7 +396,7 @@ debugger;
                 <Input type="text" placeholder="Construction cost" {...control.register('constructionCost')} />
 
 
-                <div>
+                <div  className="grid w-full gap-1.5">
                 <Input type="text" placeholder="Number of floors" {...control.register('floors')} />
                 <Input type="text" placeholder="Height above ground in meters" {...control.register('heightAboveGround')} />
                 </div>
@@ -462,12 +468,56 @@ debugger;
 
 
   return (
-    
-
-
-<div>
-      {workflowSteps.every(step => step.status === "Pending") ? ( 
-        // Case 1: All workflow stages are pending
+    <div>
+      {/* Loading State */}
+      {loading ? (
+        <div className="flex justify-center items-center min-h-screen">
+          <Commet color="#32cd32" size="medium" text="Loading..." textColor="" />
+        </div>
+      ) : !hasData ? (
+        // Default Case: Show Permit Application Form if no data or pending
+        <div>
+          <PlanAgreementForm />
+        </div>
+      ) : workflowSteps[0]?.status === "Pending" ? (
+        // Step 1: Waiting for Approval (Step 1 Pending)
+        // <div className="flex flex-col items-center justify-center h-screen">
+        //   <FileUploadForm />
+        // </div>
+        <div className="flex flex-col items-center justify-center h-screen">
+                 <PlanAgreementForm />
+          {/* <h2 className="text-xl font-semibold">Step 1: Waiting for Approval</h2>
+          <p className="text-gray-500">Your application is currently under review for Step 1.</p>
+          <Button onClick={() => window.location.reload()} className="mt-4">
+            Refresh Status
+          </Button> */}
+        </div>
+      ) : workflowSteps[1]?.status === "Pending" ? (
+        // Step 2: Waiting for Approval (Step 2 Pending)
+        <div className="flex flex-col items-center justify-center h-screen">
+          <h2 className="text-xl font-semibold">Step 2: Waiting for Approval</h2>
+          <p className="text-gray-500">Your application is currently under review for Step 2.</p>
+          <Button onClick={() => window.location.reload()} className="mt-4">
+            Refresh Status
+          </Button>
+        </div>
+      ) : workflowSteps[2]?.status === "Pending" ? (
+        // Step 3: Waiting for Approval (Step 3 Pending)
+        <div className="flex flex-col items-center justify-center h-screen">
+          <h2 className="text-xl font-semibold">Step 3: Waiting for Approval</h2>
+          <p className="text-gray-500">Your application is currently under review for Step 3.</p>
+          <Button onClick={() => window.location.reload()} className="mt-4">
+            Refresh Status
+          </Button>
+        </div>
+      ) : currentStep === 1 && isApproved ? (
+        // Case 2: Show Payment Form (Step 1 Approved)
+        <PaymentForm />
+      ) : currentStep === 2 && isApproved ? (
+        // Case 3: Show Certificate (Step 2 Approved)
+        <BuildingPermit />
+      ) : (
+        // Default Fallback: General Waiting for Approval
         <div className="flex flex-col items-center justify-center h-screen">
           <h2 className="text-xl font-semibold">Waiting for Approval</h2>
           <p className="text-gray-500">Your application is currently under review.</p>
@@ -475,164 +525,115 @@ debugger;
             Refresh Status
           </Button>
         </div>
-      ) : currentStep === 1 && isApproved ? ( 
-        // Case 2: If currentStep is 1 and approved, show the Payment Form
-        <PaymentForm />
-      ) : currentStep === 2 && isApproved ? ( 
-        // Case 3: If currentStep is 2 and approved, show the Certificate
-        <BuildingPermitCertificate />
-      ) : (
-        // Default case: Show the Permit Application Form
-        <div className=" flex items-center justify-center p-4">
-          <Card className="w-full max-w-md">
-            <CardHeader>
-              <CardTitle className="text-center">
-                <h2 className="scroll-m-20  pb-2 text-4xl font-semibold tracking-tight first:mt-0 text-primary">
-                  Building Permit Application
-                </h2>
-              </CardTitle>
-            </CardHeader>
-            <Separator />
-            <CardContent className="pt-6">
-              <div className="flex justify-between items-center mb-8">
-                {[1, 2, 3, 4].map((step) => (
-                  <React.Fragment key={step}>
-                    <div className="flex flex-col items-center">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className={`h-8 w-8 rounded-full p-0 ${
-                          step <= currentStep
-                            ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                            : 'bg-muted text-muted-foreground'
-                        }`}
-                        aria-label={`Step ${step}`}
-                      >
-                        {step}
-                      </Button>
-                    </div>
-                    {step < 4 && (
-                      <div
-                        className={`flex-1 h-[2px] ${
-                          step < currentStep ? 'bg-primary' : 'bg-muted'
-                        }`}
-                        aria-hidden="true"
-                      />
-                    )}
-                  </React.Fragment>
-                ))}
-              </div>
-  
-              <form onSubmit={(e) => e.preventDefault()}>
-                <StepContent />
-  
-                <div className="mt-8 flex justify-between">
-                  <Button
-                    variant="secondary"
-                    onClick={prevStep}
-                    disabled={currentStep === 1}
-                    className={currentStep === 1 ? 'invisible' : ''}
-                  >
-                    Previous
-                  </Button>
-                  <Button
-                    type={currentStep === 4 ? 'submit' : 'button'}
-                    onClick={currentStep !== 4 ? nextStep : onSubmit}
-                  >
-                    {currentStep === 4 ? 'Submit' : 'Next'}
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
       )}
     </div>
-
-
   );
   
-
+  
   // return (
   //   <div>
-  //     {isApproved ? (
-  //       <div className=" flex items-center justify-center p-4">
-  //       <Card className="w-full max-w-md">
-  //         <CardHeader>
-  //           <CardTitle className="text-center">
-  //           <h2 className="scroll-m-20  pb-2 text-4xl font-semibold tracking-tight first:mt-0 text-primary">
-  //           Building Permit Application
-  //     </h2>
-  //           </CardTitle>
-  //         </CardHeader>
-  //         <Separator />
-  //         <CardContent className="pt-6">
-  //           <div className="flex justify-between items-center mb-8">
-  //             {[1, 2, 3, 4].map((step) => (
-  //               <React.Fragment key={step}>
-  //                 <div className="flex flex-col items-center">
-  //                   <Button
-  //                     variant="ghost"
-  //                     size="sm"
-  //                     className={`h-8 w-8 rounded-full p-0 ${
-  //                       step <= currentStep
-  //                         ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-  //                         : 'bg-muted text-muted-foreground'
-  //                     }`}
-  //                     aria-label={`Step ${step}`}
-  //                   >
-  //                     {step}
-  //                   </Button>
-  //                 </div>
-  //                 {step < 4 && (
-  //                   <div
-  //                     className={`flex-1 h-[2px] ${
-  //                       step < currentStep ? 'bg-primary' : 'bg-muted'
-  //                     }`}
-  //                     aria-hidden="true"
-  //                   />
-  //                 )}
-  //               </React.Fragment>
-  //             ))}
-  //           </div>
-  
-  //           <form onSubmit={(e) => e.preventDefault()}>
-  //           <StepContent />
-  
-  //           <div className="mt-8 flex justify-between">
-  //             <Button
-  //               variant="secondary"
-  //               onClick={prevStep}
-  //               disabled={currentStep === 1}
-  //               className={currentStep === 1 ? 'invisible' : ''}
-  //             >
-  //               Previous
-  //             </Button>
-  //             {/* <Button
-  //               onClick={nextStep}
-  //               // disabled={currentStep === 4}
-  //             >
-  //               {currentStep === 4 ? 'Submit' : 'Next'}
-  //             </Button> */}
-  //             <Button
-  //                 type={currentStep === 4 ? 'submit' : 'button'}
-  //                 onClick={currentStep !== 4 ? nextStep : onSubmit}
-  //               >
-  //                 {currentStep === 4 ? 'Submit' : 'Next'}
-  //               </Button>
-  //           </div>
-  //           </form>
-  //         </CardContent>
-  //       </Card>
-  //     </div>
+  //     {/* Loading State */}
+  //     {loading ? (
+  //        <div className="flex justify-center items-center min-h-screen">
+  //        <Commet color="#32cd32" size="medium" text="Loading..." textColor="" />
+  //      </div>
   //     ) : (
-  //       <div className="flex flex-col items-center justify-center h-screen">
-  //         <h2 className="text-xl font-semibold">Waiting for Approval</h2>
-  //         <p className="text-gray-500">Your application is currently under review.</p>
-  //         <Button onClick={() => window.location.reload()} className="mt-4">
-  //           Refresh Status
-  //         </Button>
-  //       </div>
+  //       // Default Case: Show Permit Application Form if no data or pending
+  //       !hasData) ? (
+  //         // <div className="flex items-center justify-center p-4">
+  //         //   <Card className="w-full max-w-md">
+  //         //     <CardHeader>
+  //         //       <CardTitle className="text-center">
+  //         //         <h2 className="scroll-m-20 pb-2 text-4xl font-semibold tracking-tight first:mt-0 text-primary">
+  //         //           Building Permit Application
+  //         //         </h2>
+  //         //       </CardTitle>
+  //         //     </CardHeader>
+  //         //     <Separator />
+  //         //     <CardContent className="pt-6">
+  //         //       {/* Progress Indicator */}
+  //         //       <div className="flex justify-between items-center mb-8">
+  //         //         {[1, 2, 3, 4].map((step) => (
+  //         //           <React.Fragment key={step}>
+  //         //             <div className="flex flex-col items-center">
+  //         //               <Button
+  //         //                 variant="ghost"
+  //         //                 size="sm"
+  //         //                 className={`h-8 w-8 rounded-full p-0 ${
+  //         //                   step <= currentStep
+  //         //                     ? "bg-primary text-primary-foreground hover:bg-primary/90"
+  //         //                     : "bg-muted text-muted-foreground"
+  //         //                 }`}
+  //         //                 aria-label={`Step ${step}`}
+  //         //               >
+  //         //                 {step}
+  //         //               </Button>
+  //         //             </div>
+  //         //             {step < 4 && (
+  //         //               <div
+  //         //                 className={`flex-1 h-[2px] ${
+  //         //                   step < currentStep ? "bg-primary" : "bg-muted"
+  //         //                 }`}
+  //         //                 aria-hidden="true"
+  //         //               />
+  //         //             )}
+  //         //           </React.Fragment>
+  //         //         ))}
+  //         //       </div>
+
+  //         //       {/* Form Content */}
+  //         //       <form onSubmit={(e) => e.preventDefault()}>
+  //         //         <StepContent />
+
+  //         //         <div className="mt-8 flex justify-between">
+  //         //           <Button
+  //         //             variant="secondary"
+  //         //             onClick={prevStep}
+  //         //             disabled={currentStep === 1}
+  //         //             className={currentStep === 1 ? "invisible" : ""}
+  //         //           >
+  //         //             Previous
+  //         //           </Button>
+  //         //           <Button
+  //         //             type={currentStep === 4 ? "submit" : "button"}
+  //         //             onClick={currentStep !== 4 ? nextStep : onSubmit}
+  //         //           >
+  //         //             {currentStep === 4 ? "Submit" : "Next"}
+  //         //           </Button>
+  //         //         </div>
+  //         //       </form>
+  //         //     </CardContent>
+  //         //   </Card>
+  //         // </div>
+  //         <div>
+  //           <PlanAgreementForm  />
+  //           </div>
+  //       ) : 
+        
+  //       workflowSteps.every((step) => step.status === "Pending") ? (
+  //         // Case: All Workflow Steps are Pending
+  //     <div className="flex flex-col items-center justify-center h-screen">
+  //       <h2 className="text-xl font-semibold">Waiting for Approval</h2>
+  //       <p className="text-gray-500">Your application is currently under review.</p>
+  //       <Button onClick={() => window.location.reload()} className="mt-4">
+  //         Refresh Status
+  //       </Button>
+  //     </div>
+  //       ) : currentStep === 1 && isApproved ? (
+  //         // Case 2: Show Payment Form
+  //         <PaymentForm />
+  //       ) : currentStep === 2 && isApproved ? (
+  //         // Case 3: Show Certificate
+  //         <BuildingPermit />
+  //       ) : (
+  //         // Case 1: Waiting for Approval
+  //         <div className="flex flex-col items-center justify-center h-screen">
+  //           <h2 className="text-xl font-semibold">Waiting for Approval</h2>
+  //           <p className="text-gray-500">Your application is currently under review.</p>
+  //           <Button onClick={() => window.location.reload()} className="mt-4">
+  //             Refresh Status
+  //           </Button>
+  //         </div>
   //     )}
   //   </div>
   // );
@@ -642,3 +643,4 @@ debugger;
 }
 
 export default StepperForm;
+

@@ -36,14 +36,13 @@ export default function LoginForm({ className, ...props }) {
   };
 
   const handleSubmit = async (e) => {
-    debugger;
     e.preventDefault()
     setLoading(true)
 
     try {
       // Replace this URL with your API's login endpoint
       const response = await axios.post(`${API_URL}/user/login`, {
-        email,
+        // email,
         phoneNumber,
         password,
       })

@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,6 +21,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useForm, Controller } from 'react-hook-form';
 import axios from 'axios';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import * as base64js from 'base64-js';
 
 
 function PlanAgreementForm() {
@@ -30,6 +29,8 @@ function PlanAgreementForm() {
   const API_URL = import.meta.env.VITE_API_URL;
 
   const [currentStep, setCurrentStep] = useState(1);
+
+  const [files, setFiles] = useState({ file1: null, file2: null, file3: null });
 
   const nextStep = () => currentStep < 4 && setCurrentStep(currentStep + 1);
   const prevStep = () => currentStep > 1 && setCurrentStep(currentStep - 1);
@@ -43,6 +44,7 @@ function PlanAgreementForm() {
 
   const [isDisabled, setIsDisabled] = useState(false);
 
+  const [uploadedFiles, setUploadedFiles] = useState([]);
 
   const getCookie = (name) => {
     const value = `; ${document.cookie}`;
@@ -51,64 +53,124 @@ function PlanAgreementForm() {
     return null; // Cookie not found
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Check if we already have 3 files
+      if (uploadedFiles.length >= 3) {
+        toast({ 
+          description: 'Maximum 3 files allowed',
+          variant: 'destructive'
+        });
+        return;
+      }
+      
+      // Add the new file to uploadedFiles array
+      setUploadedFiles(prev => [...prev, file]);
+      toast({ 
+        description: `File ${file.name} added successfully!`,
+      });
+    }
+  };
+
+  const removeFile = (index) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+// Convert file to base64 using base64-js
+const fileToBase64 = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsArrayBuffer(file);
+    reader.onload = () => {
+      const buffer = new Uint8Array(reader.result);
+      const base64String = base64js.fromByteArray(buffer);
+      resolve(`data:${file.type};base64,${base64String}`);
+    };
+    reader.onerror = (error) => reject(error);
+  });
+
 
   const onSubmit = async (data) => {
     try {
-      debugger;
+      const formData = watch(); // Watch collects all data from all steps
+      toast({ description: 'Form Submitted!' });
+      console.log('Form data:', data);
+  
+      // Step 1: Verify token existence
+      const token = getCookie('accessToken');
+      if (!token) {
+        throw new Error('No access token found. Please log in again.');
+      }
+      console.log('Token:', token); // Log token to verify it's not undefined or empty
+  
+      const userPayload = JSON.parse(localStorage.getItem('userPayload'));
+      if (!userPayload || !userPayload.id) {
+        throw new Error('User payload not found or invalid.');
+      }
+      const theuserid = userPayload.id;
+      console.log('User ID:', theuserid);
+  
 
-    const formData = watch(); // Watch collects all data from all steps
-    // You can handle form submission logic here
-    toast({ description: 'Form Submitted!' });
-    console.log(data);
-
-    const token = getCookie('accessToken');
-    // const token = localStorage.getItem('accessToken');
-    const userPayload = JSON.parse(localStorage.getItem('userPayload'));
-    const theuserid = userPayload.id;
-
-    const payload = {
-      serviceId:   "67a8b6367790b30993406c31", //formData.serviceId,  // Replace with your actual form field name
-      subServiceId:  "67a8b7097790b30993406c36", //formData.subServiceId,  // Replace with your actual form field name
-      applicationDetails: "formData"  // Replace with your actual form field name
-    };
-
-    var apiUrl = `${API_URL}/application/apply`; //?userId=${theuserid}`
-    const response = await axios.post(apiUrl, payload, {
-      // method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`, // If your API requires token authentication
-        'x-access-token': token
-      },
-      body: JSON.stringify(payload)
-    });
-
-    const result = await response.data; //json();
-
-    if (response.status == 201) {
-      toast({ description: 'Service application submitted successfully!' });
-      console.log('Success:', result);
-    } else {
-      toast({ description: `Error: ${result.message}` });
-      console.error('Error:', result);
-    }
-    
-    // Reset the form after submission
-    reset();
-    setCurrentStep(1);
-    setIsDisabled(false);
+      // Prepare files for upload
+      const filesToUpload = await Promise.all(
+        uploadedFiles.map(async (file) => {
+          const base64Data = await fileToBase64(file);
+          return {
+            fileName: file.name,
+            base64Data: base64Data,
+          };
+        })
+      );
+      const payload = {
+        serviceId: "67a8b6367790b30993406c31",
+        subServiceId: "67a8b7097790b30993406c36",
+        applicationDetails: formData,
+        files: filesToUpload,
+      };
+  
+      // Step 2: Submit the application
+      const apiUrl = `${API_URL}/application/apply`;
+      console.log('Submitting to:', apiUrl);
+      const response = await axios.post(apiUrl, payload, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` // Ensure no extra spaces
+        }
+      });
+  
+      const result = response.data; // axios already parses JSON
+      console.log('applicationId', result.payment.applicationId)
+      console.log('Submission result:', result);
+      localStorage.setItem("applicationId", response.data.token)
+  
+      if (response.status === 201) {
+        toast({ description: 'Service application submitted successfully!' });
+  
+        
+      } else {
+        throw new Error(`Submission failed: ${result.message || 'Unknown error'}`);
+      }
     } catch (error) {
-      console.error('Submission Error:', error);
-    toast({ description: 'An error occurred while submitting the form.' });
+      console.error('Full error:', error); // Log full error object for debugging
+      if (error.response) {
+        // Server responded with a status like 401 or 403
+        console.error('Server Error:', error.response.data);
+        toast({ description: `Error: ${error.response.data.message || 'Unauthorized'}` });
+      } else if (error.request) {
+        console.error('No response from server');
+        toast({ description: 'No response from server. Check your connection.' });
+      } else {
+        console.error('Request setup error:', error.message);
+        toast({ description: `Error: ${error.message}` });
+      }
     }
-
   };
 
 
   const handleSearch = async (plotNumber) => {
     try {
       plotNumber = plotNumber.toUpperCase()
-debugger;
       const token = localStorage.getItem('accessToken');
   const refreshToken = localStorage.getItem('refreshToken');
   const userPayload = JSON.parse(localStorage.getItem('userPayload'));
@@ -440,6 +502,40 @@ debugger;
     <Input className="my-2" id="tenure" type="text" placeholder="Tenure Certificate Number" {...control.register('tenureCertNum')} />
     </div>
 
+    <div className="space-y-4">
+            <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
+              Step 5: Upload Required Documents
+            </h3>
+            <div className="grid gap-4">
+              <div>
+                <Label htmlFor="file-upload">Upload Documents (Max 3 files)</Label>
+                <Input
+                  id="file-upload"
+                  type="file"
+                  onChange={handleFileChange}
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                />
+              </div>
+              
+              {/* Display uploaded files */}
+              <div className="space-y-2">
+                {uploadedFiles.map((file, index) => (
+                  <div key={index} className="flex items-center justify-between bg-muted p-2 rounded">
+                    <span className="text-sm">{file.name}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeFile(index)}
+                      className="text-destructive"
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
             
           </div>
         );
@@ -521,8 +617,61 @@ debugger;
           </form>
         </CardContent>
       </Card>
+
+
+
+
+
     </div>
   );
 }
 
 export default PlanAgreementForm;
+
+
+export function FileUploadSection({ applicationId }) {
+  const [files, setFiles] = useState([null, null, null]);
+  const { toast } = useToast();
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  const handleFileChange = (index) => (event) => {
+    const newFiles = [...files];
+    newFiles[index] = event.target.files[0];
+    setFiles(newFiles);
+  };
+
+  const uploadFiles = async () => {
+    try {
+      const token = getCookie('accessToken');
+      const formData = new FormData();
+
+      files.forEach((file, index) => {
+        if (file) {
+          formData.append(`file${index}`, file);
+        }
+      });
+      formData.append('applicationId', applicationId);
+
+      const response = await axios.post(
+        `${API_URL}/application/upload-files`,
+        formData,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      if (response.status === 200 || response.status === 201) {
+        toast({ description: 'Files uploaded successfully!' });
+        setFiles([null, null, null]); // Reset files after successful upload
+      }
+    } catch (error) {
+      console.error('File upload error:', error);
+      toast({ 
+        description: error.response?.data?.message || 'Failed to upload files',
+        variant: 'destructive'
+      });
+    }
+  }}

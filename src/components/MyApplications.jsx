@@ -10,10 +10,21 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import axios from "axios";
 import { Eye } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+
+
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const MyApplications = () => {
   const [applications, setApplications] = useState([]);
   const [selectedApp, setSelectedApp] = useState(null);
+
+
+  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  const [applicationCode, setApplicationCode] = useState("");
+  const [paymentDetails, setPaymentDetails] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   // Fetch applications from the API
   useEffect(() => {
@@ -26,7 +37,7 @@ const MyApplications = () => {
       }
       try {
         // const response = await axios.get("http://localhost:4023/api/application");
-        const response = await axios.get(`http://localhost:4023/api/application/user/${userId}`);
+        const response = await axios.get(`${API_URL}/application/user/${userId}`);
         if (response.data.status === "success") {
           setApplications(response.data.applications);
         }
@@ -36,6 +47,29 @@ const MyApplications = () => {
     };
     fetchApplications();
   }, []);
+
+  // Fetch payment details by application code
+  const fetchPaymentDetails = async () => {
+    debugger;
+    setLoading(true);
+    try {
+      const response = await axios.get(`${API_URL}/api/application/code?applicationCode=${applicationCode}`);
+      if (response.data.status === "success") {
+        setPaymentDetails({
+          application: response.data.application,
+          payment: response.data.payment
+        });
+      } else {
+        setPaymentDetails(null);
+        alert(response.data.message || "Application not found");
+      }
+    } catch (error) {
+      console.error("Failed to fetch payment details:", error);
+      setPaymentDetails(null);
+      alert("Error fetching payment details");
+    }
+    setLoading(false);
+  };
 
   // Define table columns for applications
   const applicationColumns = useMemo(
@@ -58,6 +92,21 @@ const MyApplications = () => {
         header: "Current Step",
       },
       {
+        id: "paymentForm",
+        header: "Payment Form",
+        cell: ({ row }) => (
+          <Button 
+            size="sm" 
+            onClick={() => {
+              setApplicationCode(row.original.applicationCode || "");
+              setIsPaymentDialogOpen(true);
+            }}
+          >
+            View Payment
+          </Button>
+        ),
+      },
+      {
         id: "details",
         header: "Details",
         cell: ({ row }) => (
@@ -70,6 +119,8 @@ const MyApplications = () => {
     ],
     []
   );
+
+  
 
   // Define table columns for workflow steps
   const workflowColumns = useMemo(
@@ -213,7 +264,7 @@ const MyApplications = () => {
       </Card>
 
       {/* Dialog for Application Details */}
-      <Dialog open={!!selectedApp} onOpenChange={() => setSelectedApp(null)}>
+      {/* <Dialog open={!!selectedApp} onOpenChange={() => setSelectedApp(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Application Details</DialogTitle>
@@ -230,7 +281,7 @@ const MyApplications = () => {
                     <strong>Application ID:</strong> {selectedApp._id}
                   </p>
                   <p>
-                    <strong>Service ID:</strong> {selectedApp.serviceId}
+                    <strong>Service ID:</strong> {selectedApp.serviceId?.name}
                   </p>
                   <p>
                     <strong>Sub-service:</strong> {selectedApp.subServiceId?.name || "N/A"}
@@ -289,7 +340,133 @@ const MyApplications = () => {
             </div>
           )}
         </DialogContent>
+      </Dialog> */}
+
+{selectedApp && (
+  <Dialog open={!!selectedApp} onOpenChange={() => setSelectedApp(null)}>
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Application Details</DialogTitle>
+        <DialogDescription>
+          Detailed information about the selected application.
+        </DialogDescription>
+      </DialogHeader>
+
+      <div className="space-y-4">
+        {/* General Information */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <strong>Application ID:</strong>
+          </div>
+          <div>{selectedApp._id}</div>
+
+          <div>
+            <strong>Service ID:</strong>
+          </div>
+          <div>{selectedApp.serviceId?.name || "N/A"}</div>
+
+          <div>
+            <strong>Sub-service:</strong>
+          </div>
+          <div>{selectedApp.subServiceId?.name || "N/A"}</div>
+
+          <div>
+            <strong>Status:</strong>
+          </div>
+          <div>{selectedApp.status}</div>
+
+          <div>
+            <strong>Current Step:</strong>
+          </div>
+          <div>{selectedApp.currentStep}</div>
+        </div>
+
+        {/* Application Details Table */}
+        <div>
+          <strong>Details:</strong>
+          <div className="mt-2 max-h-60 overflow-y-auto border rounded-md">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  <th className="border p-2 text-left bg-gray-100">Key</th>
+                  <th className="border p-2 text-left bg-gray-100">Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(selectedApp.applicationDetails || {}).map(
+                  ([key, value]) => (
+                    <tr key={key}>
+                      <td className="border p-1">{key}</td>
+                      <td className="border p-1">{value || "N/A"}</td>
+                    </tr>
+                  )
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </DialogContent>
+  </Dialog>
+)}
+
+
+{/* Payment Details Dialog */}
+<Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Payment Details</DialogTitle>
+            <DialogDescription>
+              Enter application code to view payment details
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <Input
+                placeholder="Enter Application Code"
+                value={applicationCode}
+                onChange={(e) => setApplicationCode(e.target.value)}
+                className="mb-2"
+              />
+              <Button 
+                onClick={fetchPaymentDetails}
+                disabled={loading || !applicationCode}
+              >
+                {loading ? "Loading..." : "Submit"}
+              </Button>
+            </div>
+
+            {paymentDetails && (
+              <div className="space-y-2">
+                <h4 className="font-semibold">Application Details:</h4>
+                <p><strong>Application ID:</strong> {paymentDetails.application._id}</p>
+                <p><strong>Service:</strong> {paymentDetails.application.serviceId?.name || "N/A"}</p>
+                
+                {paymentDetails.payment ? (
+                  <>
+                    <h4 className="font-semibold mt-2">Payment Details:</h4>
+                    <p><strong>Payment ID:</strong> {paymentDetails.payment._id}</p>
+                    <p><strong>Amount:</strong> {paymentDetails.payment.amount}</p>
+                    <p><strong>Status:</strong> {paymentDetails.payment.status}</p>
+                    <p><strong>Date:</strong> {new Date(paymentDetails.payment.createdAt).toLocaleString()}</p>
+                  </>
+                ) : (
+                  <p>No payment details available for this application.</p>
+                )}
+              </div>
+            )}
+          </div>
+        </DialogContent>
       </Dialog>
+
+      {/* Existing Application Details Dialog */}
+      {selectedApp && (
+        <Dialog open={!!selectedApp} onOpenChange={() => setSelectedApp(null)}>
+          {/* ... existing application details dialog code ... */}
+        </Dialog>
+      )}
+
     </div>
   );
 };

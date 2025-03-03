@@ -12,6 +12,7 @@ import axios from "axios"
 import { useToast } from "@/hooks/use-toast"
 import {Home}  from "lucide-react"
 
+
 // const schema = z.object({
 //   role: z.enum(["0", "1", "2", "3"]).default("0"),
 //   firstName: z.string().min(1, "First Name is required"),
@@ -26,6 +27,7 @@ import {Home}  from "lucide-react"
 //     city: z.string().min(1, "City is required"),
 //     state: z.string().min(1, "State is required"),
 //     postalCode: z.string().min(1, "Postal Code is required"),
+//     country: z.string().min(1, "Country is required"), // Add country if required
 //   }),
 //   idCard: z.string().optional(),
 //   signature: z.string().optional(),
@@ -35,33 +37,7 @@ import {Home}  from "lucide-react"
 //   nationalId: z.string().min(1, "National ID is required"),
 //   email: z.string().email("Invalid email address"),
 //   password: z.string().min(6, "Password must be at least 6 characters"),
-// })
-
-const schema = z.object({
-  role: z.enum(["0", "1", "2", "3"]).default("0"),
-  firstName: z.string().min(1, "First Name is required"),
-  middleName: z.string().optional(),
-  lastName: z.string().min(1, "Last Name is required"),
-  dateOfBirth: z.string().min(1, "Date of Birth is required"),
-  phoneNumber: z.string().min(10, "Phone Number is required"),
-  salesID: z.string().optional(),
-  emergencyContact: z.string().min(10, "Emergency Contact is required"),
-  address: z.object({
-    street: z.string().min(1, "Street is required"),
-    city: z.string().min(1, "City is required"),
-    state: z.string().min(1, "State is required"),
-    postalCode: z.string().min(1, "Postal Code is required"),
-    country: z.string().min(1, "Country is required"), // Add country if required
-  }),
-  idCard: z.string().optional(),
-  signature: z.string().optional(),
-  agreement: z.string().min(1, "Agreement is required"),
-  profilePhoto: z.any().optional(),
-  deviceId: z.string().min(1, "Device ID is required"),
-  nationalId: z.string().min(1, "National ID is required"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
+// });
 
 export default function RegisterForm({ className, ...props }) {
   const API_URL = import.meta.env.VITE_API_URL
@@ -69,7 +45,10 @@ export default function RegisterForm({ className, ...props }) {
   const { toast } = useToast()
 
   const { register, handleSubmit, formState: { errors } } = useForm({
-    resolver: zodResolver(schema),
+    // resolver: zodResolver(schema),
+    defaultValues: {
+      address: {},
+    }
   })
 
   // const onSubmit = async (data) => {
@@ -111,6 +90,8 @@ export default function RegisterForm({ className, ...props }) {
   //     toast({ title: "Error", description: "An error occurred. Please try again.", variant: "destructive" });
   //   }
   // };
+  
+  
   const onSubmit = async (data) => {
     debugger;
     try {
@@ -119,7 +100,7 @@ export default function RegisterForm({ className, ...props }) {
       // Construct the user object according to the API schema
       const userData = {
         firstName: data.firstName,
-        middleName: data.middleName,
+        middleName: data.middleName || "",
         lastName: data.lastName,
         dateOfBirth: data.dateOfBirth,
         phoneNumber: data.phoneNumber,
@@ -132,17 +113,19 @@ export default function RegisterForm({ className, ...props }) {
           postalCode: data.address.postalCode,
           country: data.address.country, // Add country if required
         },
-        emergencyContact: data.emergencyContact,
-        idCard: data.idCard,
-        signature: data.signature,
-        agreement: data.agreement,
+        emergencyContact: data.emergencyContact || "",
+        idCard: data.idCard || "",
+        signature: data.signature || "",
+        // agreement: data.agreement,
         profilePhoto: data.profilePhoto?.[0], // Assuming file input is an array
-        deviceId: data.deviceId,
-        nationalId: data.nationalId,
+        deviceId: data.deviceId || "",
+        nationalId: data.nationalId || "",
+        salesID: data.salesID || "",
       };
   
       // Append the user object to FormData
       Object.keys(userData).forEach((key) => {
+        debugger;
         if (key === "address") {
           // Flatten the address object into FormData
           Object.keys(userData.address).forEach((subKey) => {
@@ -155,22 +138,31 @@ export default function RegisterForm({ className, ...props }) {
           formData.append(`user[${key}]`, userData[key]);
         }
       });
-  
+      // console.log(formData);
+      for (const [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+      }
+  debugger;
       const response = await axios.post(`${API_URL}/user/createUser`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
   
-      if (response.status === 201) {
+      // if (response.status === 201) {
+        if (response.data.status === "success") {
         toast({ title: "Registration Successful", description: "Your account has been created successfully!" });
-        navigate("/");
+        navigate("/login");
       } else {
-        toast({ title: "Registration Failed", description: "Please try again.", variant: "destructive" });
+        toast({ title: "Registration Failed", 
+          description: response.data.message || "Please try again.", 
+          variant: "destructive" });
       }
     } catch (error) {
       console.error("Error during registration:", error);
-      toast({ title: "Error", description: "An error occurred. Please try again.", variant: "destructive" });
+      toast({ title: "Error",
+         description: error.response?.data?.message || "An error occurred. Please try again.",
+          variant: "destructive" });
     }
   };
 
@@ -226,32 +218,45 @@ export default function RegisterForm({ className, ...props }) {
                 </div>
               </form> */}
               
-              <form onSubmit={onSubmit}>
+              <form onSubmit={handleSubmit(onSubmit)}>
   <div className="flex flex-col gap-6">
     {[
-      { label: "First Name", id: "firstName" },
+      { label: "First Name", id: "firstName", required: true },
       { label: "Middle Name", id: "middleName" },
-      { label: "Last Name", id: "lastName" },
-      { label: "Date of Birth", id: "dateOfBirth", type: "date" },
-      { label: "Phone Number", id: "phoneNumber", type: "tel" },
+      { label: "Last Name", id: "lastName", required: true },
+      { label: "Date of Birth", id: "dateOfBirth", type: "date", required: true },
+      { label: "Phone Number", id: "phoneNumber", type: "tel", required: true },
       { label: "Sales ID", id: "salesID" },
       { label: "Emergency Contact", id: "emergencyContact", type: "tel" },
       { label: "ID Card", id: "idCard" },
       { label: "Signature", id: "signature" },
       { label: "Device ID", id: "deviceId" },
       { label: "National ID", id: "nationalId" },
-      { label: "Email", id: "email", type: "email" },
-      { label: "Password", id: "password", type: "password" },
-    ].map(({ label, id, type = "text" }) => (
+      { label: "Email", id: "email", type: "email", required: true },
+      { label: "Password", id: "password", type: "password", required: true },
+    ].map(({ label, id, type = "text", required = false }) => (
       <div key={id} className="grid gap-2">
         <Label htmlFor={id}>{label}</Label>
-        <Input id={id} type={type} {...register(id)} />
-        {errors[id] && <p className="text-red-500 text-sm">{errors[id]?.message}</p>}
+        <Input 
+        id={id}
+         type={type} 
+        //  {...register(id)} />
+        // {errors[id] && <p className="text-red-500 text-sm">{errors[id]?.message}</p>}
+        {...register(id, {
+          required: required ? `${label} is required` : false,
+          ...(id === "email" && {
+            pattern: {
+              value: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+              message: "Please enter a valid email",
+            },
+          }),
+        })}
+        />
       </div>
     ))}
 
     {/* Address Fields */}
-    <div className="grid gap-2">
+    {/* <div className="grid gap-2">
       <Label htmlFor="street">Street</Label>
       <Input id="street" {...register("address.street")} />
       {errors.address?.street && <p className="text-red-500 text-sm">{errors.address.street.message}</p>}
@@ -275,7 +280,27 @@ export default function RegisterForm({ className, ...props }) {
       <Label htmlFor="country">Country</Label>
       <Input id="country" {...register("address.country")} />
       {errors.address?.country && <p className="text-red-500 text-sm">{errors.address.country.message}</p>}
-    </div>
+    </div> */}
+
+    {/* Address Fields */}
+    {[
+                    { label: "Street", id: "address.street" },
+                    { label: "City", id: "address.city" },
+                    { label: "State", id: "address.state" },
+                    { label: "Postal Code", id: "address.postalCode" },
+                    { label: "Country", id: "address.country" },
+                  ].map(({ label, id }) => (
+                    <div key={id} className="grid gap-2">
+                      <Label htmlFor={id}>{label}</Label>
+                      <Input
+                        id={id}
+                        {...register(id, { required: `${label} is required` })}
+                      />
+                      {errors.address?.[id.split(".")[1]] && (
+                        <p className="text-red-500 text-sm">{errors.address[id.split(".")[1]].message}</p>
+                      )}
+                    </div>
+                  ))}
 
     {/* Profile Photo */}
     <div className="grid gap-2">

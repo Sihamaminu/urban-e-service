@@ -43,7 +43,7 @@ export default function LoginForm({ className, ...props }) {
     try {
       // Replace this URL with your API's login endpoint
       const response = await axios.post(`${API_URL}/user/login`, {
-        email,
+        // email,
         phoneNumber,
         password,
       })

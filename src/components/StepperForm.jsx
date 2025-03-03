@@ -485,11 +485,12 @@ function StepperForm() {
         //   <FileUploadForm />
         // </div>
         <div className="flex flex-col items-center justify-center h-screen">
-          <h2 className="text-xl font-semibold">Step 1: Waiting for Approval</h2>
+                 <PlanAgreementForm />
+          {/* <h2 className="text-xl font-semibold">Step 1: Waiting for Approval</h2>
           <p className="text-gray-500">Your application is currently under review for Step 1.</p>
           <Button onClick={() => window.location.reload()} className="mt-4">
             Refresh Status
-          </Button>
+          </Button> */}
         </div>
       ) : workflowSteps[1]?.status === "Pending" ? (
         // Step 2: Waiting for Approval (Step 2 Pending)

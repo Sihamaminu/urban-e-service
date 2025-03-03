@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,15 +53,39 @@ function PlanAgreementForm() {
     return null; // Cookie not found
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Check if we already have 3 files
+      if (uploadedFiles.length >= 3) {
+        toast({ 
+          description: 'Maximum 3 files allowed',
+          variant: 'destructive'
+        });
+        return;
+      }
+      
+      // Add the new file to uploadedFiles array
+      setUploadedFiles(prev => [...prev, file]);
+      toast({ 
+        description: `File ${file.name} added successfully!`,
+      });
+    }
+  };
+
+  const removeFile = (index) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
 // Convert file to base64 using base64-js
 const fileToBase64 = (file) =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.readAsArrayBuffer(file); // Read file as ArrayBuffer
+    reader.readAsArrayBuffer(file);
     reader.onload = () => {
       const buffer = new Uint8Array(reader.result);
-      const base64String = base64js.fromByteArray(buffer); // Convert to base64 with base64-js
-      resolve(`data:${file.type};base64,${base64String}`); // Add data URI prefix
+      const base64String = base64js.fromByteArray(buffer);
+      resolve(`data:${file.type};base64,${base64String}`);
     };
     reader.onerror = (error) => reject(error);
   });
@@ -80,7 +102,7 @@ const fileToBase64 = (file) =>
       if (!token) {
         throw new Error('No access token found. Please log in again.');
       }
-      console.log('Token:', token); // Log token to verify it’s not undefined or empty
+      console.log('Token:', token); // Log token to verify it's not undefined or empty
   
       const userPayload = JSON.parse(localStorage.getItem('userPayload'));
       if (!userPayload || !userPayload.id) {
@@ -486,28 +508,30 @@ const fileToBase64 = (file) =>
             </h3>
             <div className="grid gap-4">
               <div>
-                <Label htmlFor="file1">Document 1</Label>
+                <Label htmlFor="file-upload">Upload Documents (Max 3 files)</Label>
                 <Input
-                  id="file1"
+                  id="file-upload"
                   type="file"
-                  onChange={(e) => handleFileChange(e, 'file1')}
+                  onChange={handleFileChange}
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                 />
               </div>
-              <div>
-                <Label htmlFor="file2">Document 2</Label>
-                <Input
-                  id="file2"
-                  type="file"
-                  onChange={(e) => handleFileChange(e, 'file2')}
-                />
-              </div>
-              <div>
-                <Label htmlFor="file3">Document 3</Label>
-                <Input
-                  id="file3"
-                  type="file"
-                  onChange={(e) => handleFileChange(e, 'file3')}
-                />
+              
+              {/* Display uploaded files */}
+              <div className="space-y-2">
+                {uploadedFiles.map((file, index) => (
+                  <div key={index} className="flex items-center justify-between bg-muted p-2 rounded">
+                    <span className="text-sm">{file.name}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeFile(index)}
+                      className="text-destructive"
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

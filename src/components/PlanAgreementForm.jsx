@@ -70,7 +70,6 @@ const fileToBase64 = (file) =>
 
 
   const onSubmit = async (data) => {
-    debugger;
     try {
       const formData = watch(); // Watch collects all data from all steps
       toast({ description: 'Form Submitted!' });
@@ -150,7 +149,6 @@ const fileToBase64 = (file) =>
   const handleSearch = async (plotNumber) => {
     try {
       plotNumber = plotNumber.toUpperCase()
-debugger;
       const token = localStorage.getItem('accessToken');
   const refreshToken = localStorage.getItem('refreshToken');
   const userPayload = JSON.parse(localStorage.getItem('userPayload'));

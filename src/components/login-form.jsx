@@ -36,7 +36,6 @@ export default function LoginForm({ className, ...props }) {
   };
 
   const handleSubmit = async (e) => {
-    debugger;
     e.preventDefault()
     setLoading(true)
 

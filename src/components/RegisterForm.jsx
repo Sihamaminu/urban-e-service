@@ -52,7 +52,6 @@ export default function RegisterForm({ className, ...props }) {
   })
 
   // const onSubmit = async (data) => {
-  //   debugger;
   //   try {
   //     const formData = new FormData();
   
@@ -93,7 +92,6 @@ export default function RegisterForm({ className, ...props }) {
   
   
   const onSubmit = async (data) => {
-    debugger;
     try {
       const formData = new FormData();
   
@@ -125,7 +123,6 @@ export default function RegisterForm({ className, ...props }) {
   
       // Append the user object to FormData
       Object.keys(userData).forEach((key) => {
-        debugger;
         if (key === "address") {
           // Flatten the address object into FormData
           Object.keys(userData.address).forEach((subKey) => {
@@ -142,7 +139,6 @@ export default function RegisterForm({ className, ...props }) {
       for (const [key, value] of formData.entries()) {
         console.log(`${key}:`, value);
       }
-  debugger;
       const response = await axios.post(`${API_URL}/user/createUser`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",

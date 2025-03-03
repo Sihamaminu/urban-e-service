@@ -28,7 +28,6 @@ const MyApplications = () => {
 
   // Fetch applications from the API
   useEffect(() => {
-    debugger;
     const userId = localStorage.getItem("userId");
     const fetchApplications = async () => {
       if (!userId) {
@@ -50,7 +49,6 @@ const MyApplications = () => {
 
   // Fetch payment details by application code
   const fetchPaymentDetails = async () => {
-    debugger;
     setLoading(true);
     try {
       const response = await axios.get(`${API_URL}/api/application/code?applicationCode=${applicationCode}`);

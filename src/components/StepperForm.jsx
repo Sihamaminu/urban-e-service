@@ -67,7 +67,6 @@ function StepperForm() {
 
   const onSubmit = async (data) => {
     try {
-      debugger;
 
     const formData = watch(); // Watch collects all data from all steps
     // You can handle form submission logic here
@@ -125,7 +124,6 @@ function StepperForm() {
   const handleSearch = async (plotNumber) => {
     try {
       plotNumber = plotNumber.toUpperCase()
-debugger;
       const token = localStorage.getItem('accessToken');
   const refreshToken = localStorage.getItem('refreshToken');
   const userPayload = JSON.parse(localStorage.getItem('userPayload'));
